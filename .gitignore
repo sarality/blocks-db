@@ -1,0 +1,15 @@
+# Local files for Gradle
+.gradle
+
+# Idea Project, Module and Config files
+*.iml
+.idea
+
+# Local Properties file
+/local.properties
+
+# Tracking files generated on a Mac
+.DS_Store
+
+# Build folders
+/build

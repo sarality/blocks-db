@@ -14,7 +14,7 @@ public class SQLiteDatabaseProvider extends SQLiteOpenHelper {
   private final TableDefinition definition;
 
   public SQLiteDatabaseProvider(Context context, TableDefinition definition) {
-    super(context, definition.getDatabaseName(), null, definition.getDatabaseVersion());
+    super(context, definition.getDatabaseName(), null, definition.getTableVersion());
     this.definition = definition;
   }
 

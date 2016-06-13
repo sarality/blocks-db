@@ -7,13 +7,37 @@ package com.sarality.db;
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public interface TableDefinition {
+public class TableDefinition {
 
-  String getDatabaseName();
+  // Name of the database e.g. users.db.
+  private final String databaseName;
+  // Name of the database e.g. Users.
+  private final String tableName;
+  // The version of the database defined by the given set of columns
+  private final int tableVersion;
 
-  int getDatabaseVersion();
+  private final Column[] columns;
 
-  String getTableName();
+  public TableDefinition(String databaseName, String tableName, int tableVersion, Column[] columns) {
+    this.databaseName = databaseName;
+    this.tableName = tableName;
+    this.tableVersion = tableVersion;
+    this.columns = columns;
+  }
 
-  Column[] getColumns();
+  public String getDatabaseName() {
+    return databaseName;
+  }
+
+  public String getTableName() {
+    return tableName;
+  }
+
+  public int getTableVersion() {
+    return tableVersion;
+  }
+
+  public Column[] getColumns() {
+    return columns;
+  }
 }

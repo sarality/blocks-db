@@ -36,7 +36,7 @@ public class SimpleQueryBuilder {
     return this;
   }
 
-  public String build() {
+  private String getWhereClause() {
     if (columnList.isEmpty()) {
       return null;
     }
@@ -54,10 +54,14 @@ public class SimpleQueryBuilder {
     return builder.toString();
   }
 
-  public String[] getArguments() {
+  private String[] getArguments() {
     if (argumentValueList.isEmpty()) {
       return null;
     }
     return argumentValueList.toArray(new String[argumentValueList.size()]);
+  }
+
+  public Query build() {
+    return new Query(getWhereClause(), getArguments(), null);
   }
 }

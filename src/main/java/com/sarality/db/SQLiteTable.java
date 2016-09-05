@@ -109,8 +109,8 @@ public class SQLiteTable<T> implements Table<T> {
    * @param query Query to define the set of rows that need to be deleted.
    */
   @Override
-  public void delete(Query query) {
-    database.delete(tableDefinition.getTableName(), query.getWhereClause(), query.getWhereClauseArguments());
+  public int delete(Query query) {
+    return database.delete(tableDefinition.getTableName(), query.getWhereClause(), query.getWhereClauseArguments());
   }
 
   /**
@@ -156,7 +156,7 @@ public class SQLiteTable<T> implements Table<T> {
    * @param query Query for the rows that need to be updated.
    */
   @Override
-  public void update(T data, Query query) {
+  public int update(T data, Query query) {
     assertDatabaseOpen();
 
     // TODO(abhideep) Before we update the data, sanitize and validate that the data is valid.
@@ -165,6 +165,7 @@ public class SQLiteTable<T> implements Table<T> {
     populator.populate(contentValues, data);
     int num = database.update(getTableName(), contentValues, query.getWhereClause(), query.getWhereClauseArguments());
     logger.debug("Updated {} number of rows in table {}", num, getTableName());
+    return num;
   }
 
   private String getTableName() {

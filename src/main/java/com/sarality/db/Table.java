@@ -1,5 +1,8 @@
 package com.sarality.db;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+
 import com.sarality.db.query.Query;
 
 import java.util.List;
@@ -19,7 +22,7 @@ public interface Table<T> {
 
   List<T> readAll(Query query);
 
-  void update(T data, Query query);
+  int update(T data, Query query);
 
-  void delete(Query query);
+  int delete(Query query);
 }

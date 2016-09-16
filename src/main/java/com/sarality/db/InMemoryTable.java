@@ -1,8 +1,10 @@
 package com.sarality.db;
 
+import com.android.internal.util.Predicate;
 import com.sarality.db.query.Query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +19,6 @@ public abstract class InMemoryTable<T> implements Table<T> {
 
   private static final AtomicLong PRIMARY_KEY = new AtomicLong(1000);
   private Map<Long, T> dataMap = new LinkedHashMap<>();
-
 
   public abstract void setId(T data, Long id);
 
@@ -41,8 +42,22 @@ public abstract class InMemoryTable<T> implements Table<T> {
 
   @Override
   public List<T> readAll(Query query) {
+
     List<T> dataList = new ArrayList<>();
-    dataList.addAll(dataMap.values());
+
+    if (query == null) {
+      dataList.addAll(dataMap.values());
+      return dataList;
+    }
+
+    String[] whereArgs = query.getWhereClauseArguments();
+
+    if (whereArgs.length != 0) {
+      //filter the list
+      Long key = Long.parseLong(whereArgs[0]);
+      dataList.add(dataMap.get(key));
+    }
+
     return dataList;
   }
 
@@ -57,4 +72,5 @@ public abstract class InMemoryTable<T> implements Table<T> {
     // Not implemented
     return 0;
   }
+
 }

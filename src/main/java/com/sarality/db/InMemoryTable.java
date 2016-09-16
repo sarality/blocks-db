@@ -1,10 +1,8 @@
 package com.sarality.db;
 
-import com.android.internal.util.Predicate;
 import com.sarality.db.query.Query;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +43,7 @@ public abstract class InMemoryTable<T> implements Table<T> {
 
     List<T> dataList = new ArrayList<>();
 
+    //null query, just return everything
     if (query == null) {
       dataList.addAll(dataMap.values());
       return dataList;
@@ -52,10 +51,14 @@ public abstract class InMemoryTable<T> implements Table<T> {
 
     String[] whereArgs = query.getWhereClauseArguments();
 
+    //assumes that there is only 1 argument in the where clause which is a primary key Id to retrieve.
     if (whereArgs.length != 0) {
-      //filter the list
       Long key = Long.parseLong(whereArgs[0]);
       dataList.add(dataMap.get(key));
+    }
+    else {
+      //return everything: no other type of query is supported
+      dataList.addAll(dataMap.values());
     }
 
     return dataList;

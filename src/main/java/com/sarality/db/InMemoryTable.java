@@ -69,7 +69,7 @@ public abstract class InMemoryTable<T> implements Table<T> {
     return 0;
   }
 
-  protected final Long extractKeyFromQuery(Query query){
+  private Long extractKeyFromQuery(Query query){
 
     Long key;
 

@@ -1,7 +1,7 @@
 package com.sarality.db;
 
+import com.sarality.db.query.ParsedQuery;
 import com.sarality.db.query.Query;
-import com.sarality.db.query.QueryParser;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -21,7 +21,7 @@ public abstract class InMemoryTable<T> implements Table<T> {
 
   public abstract void setId(T data, Long id);
 
-  public abstract Column getPrimaryKeyField();
+  public abstract Column getPrimaryKey();
 
   @Override
   public void open() {
@@ -53,24 +53,44 @@ public abstract class InMemoryTable<T> implements Table<T> {
     }
 
     // parse the query
-    QueryParser queryParser = new QueryParser(query);
+    ParsedQuery parsedQuery = new ParsedQuery(query);
 
     // check if this is a supported query
-    if (!isSupportedQueryType(queryParser)) {
+    if (!isPrimaryKeyQuery(parsedQuery)) {
       throw new UnsupportedOperationException(
           "This type of query is not supported in InMemoryTables. The where clause" +
               " should be of the format primaryKeyId = ?");
     }
 
     // get the item that matches the query request
-    dataList.add(dataMap.get(getKey(queryParser)));
+    dataList.add(dataMap.get(getKey(parsedQuery)));
     return dataList;
   }
 
   @Override
   public int update(T data, Query query) {
-    // Not implemented
-    return 0;
+    // Updates a single row in the InMemory Table identified by the primary key.
+    if (query == null) {
+      throw new UnsupportedOperationException(
+          "Only updates of a single row are supported in in-memory tables. A query of the type primaryKeyId = ? is " +
+              "needed for the update operation.");
+    }
+
+    // parse the query
+    ParsedQuery parsedQuery = new ParsedQuery(query);
+
+    // check if this is a supported query
+    if (!isPrimaryKeyQuery(parsedQuery)) {
+      throw new UnsupportedOperationException(
+          "This type of query is not supported in InMemoryTables. The where clause" +
+              " should be of the format primaryKeyId = ?");
+
+    }
+
+    // update the object
+    dataMap.put(getKey(parsedQuery), data);
+
+    return 1;
   }
 
   @Override
@@ -79,20 +99,20 @@ public abstract class InMemoryTable<T> implements Table<T> {
     return 0;
   }
 
-  private boolean isSupportedQueryType(QueryParser queryParser) {
+  private boolean isPrimaryKeyQuery(ParsedQuery parsedQuery) {
     // Check the format of the whereClause
     boolean isSupported = false;
 
     // Check the field name should be the same as the primary key
-    isSupported = queryParser.getColumnList().size() == 1
-        & queryParser.getColumnList().get(0).equalsIgnoreCase(getPrimaryKeyField().getName())
-        & queryParser.getArgumentValueList().size() == 1;
+    isSupported = parsedQuery.getColumnList().size() == 1
+        & parsedQuery.getColumnList().get(0).equalsIgnoreCase(getPrimaryKey().getName())
+        & parsedQuery.getArgumentValueList().size() == 1;
 
     return isSupported;
 
   }
 
-  private Long getKey(QueryParser queryParser) {
-    return Long.parseLong(queryParser.getArgumentValueList().get(0));
+  private Long getKey(ParsedQuery parsedQuery) {
+    return Long.parseLong(parsedQuery.getArgumentValueList().get(0));
   }
 }

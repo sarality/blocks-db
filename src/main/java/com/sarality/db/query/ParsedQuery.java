@@ -9,26 +9,27 @@ import java.util.List;
 /**
  * Given a query, reverses the Query Builder operations and extracts the columnlist, operators and arguments
  *
- * @author satya@ Satya Puniani
+ * @author satya@ (Satya Puniani)
  */
-public class QueryParser {
+public class ParsedQuery {
 
-  //TODO strongly type these lists to Column and Operator
+  // TODO strongly type these lists to Column and Operator
   private final LogicalOperator operator = LogicalOperator.AND;
   private final List<String> columnList = new ArrayList<>();
   private final List<String> operatorList = new ArrayList<>();
   private final List<String> argumentValueList = new ArrayList<>();
 
-  public QueryParser(Query query){
+  public ParsedQuery(Query query) {
 
-    //TODO get logical operator
+    // TODO get logical operator
 
-    //get where clause as string array
-    String operatorNames = TextUtils.join("|",LogicalOperator.values());
+    // TODO throw a ParseException if unable to parse this query
+    // get where clause as string array
+    String operatorNames = TextUtils.join("|", LogicalOperator.values());
     String[] whereClause = query.getWhereClause().split(operatorNames);
 
-    //for each where clause, get columnname, operator, argument
-    for (String predicate : whereClause){
+    // for each where clause, get columnname, operator, argument
+    for (String predicate : whereClause) {
       String[] expression = predicate.split(" ");
       columnList.add(expression[0]);
       operatorList.add(expression[1]);

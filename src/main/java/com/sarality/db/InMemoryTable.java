@@ -1,7 +1,7 @@
 package com.sarality.db;
 
 import com.sarality.db.query.Query;
-import com.sarality.db.query.SimpleQueryExtractor;
+import com.sarality.db.query.QueryParser;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -52,8 +52,18 @@ public abstract class InMemoryTable<T> implements Table<T> {
       return dataList;
     }
 
-    dataList.add(dataMap.get(extractKeyFromQuery(query)));
+    // parse the query
+    QueryParser queryParser = new QueryParser(query);
 
+    // check if this is a supported query
+    if (!isSupportedQueryType(queryParser)) {
+      throw new UnsupportedOperationException(
+          "This type of query is not supported in InMemoryTables. The where clause" +
+              " should be of the format primaryKeyId = ?");
+    }
+
+    // get the item that matches the query request
+    dataList.add(dataMap.get(getKey(queryParser)));
     return dataList;
   }
 
@@ -69,28 +79,20 @@ public abstract class InMemoryTable<T> implements Table<T> {
     return 0;
   }
 
-  private Long extractKeyFromQuery(Query query){
-
-    Long key;
-
-    // Check if Query format is supported
-    SimpleQueryExtractor simpleQueryExtractor = new SimpleQueryExtractor(query);
-
+  private boolean isSupportedQueryType(QueryParser queryParser) {
     // Check the format of the whereClause
-    if (simpleQueryExtractor.getColumnList().size() != 1) {
-      throw new UnsupportedOperationException("There can be only one predicate in the query");
-    }
+    boolean isSupported = false;
 
     // Check the field name should be the same as the primary key
-    if (!simpleQueryExtractor.getColumnList().get(0).equalsIgnoreCase(getPrimaryKeyField().getName())) {
-      throw new UnsupportedOperationException("Column name must be the name of the primary key field");
-    }
+    isSupported = queryParser.getColumnList().size() == 1
+        & queryParser.getColumnList().get(0).equalsIgnoreCase(getPrimaryKeyField().getName())
+        & queryParser.getArgumentValueList().size() == 1;
 
-    // Assumes that there is only 1 argument in the where clause which is a primary key Id to retrieve.
-    if (simpleQueryExtractor.getArgumentValueList().size() !=1 ) {
-      throw new UnsupportedOperationException("There should be only one argument which should be a primary key Id");
-    }
+    return isSupported;
 
-    return Long.parseLong(simpleQueryExtractor.getArgumentValueList().get(0));
+  }
+
+  private Long getKey(QueryParser queryParser) {
+    return Long.parseLong(queryParser.getArgumentValueList().get(0));
   }
 }

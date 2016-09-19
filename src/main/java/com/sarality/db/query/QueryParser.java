@@ -7,18 +7,19 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Given a query, reverses the SimpleQueryBuilder operations and extracts the columnlist, operators and arguments
+ * Given a query, reverses the Query Builder operations and extracts the columnlist, operators and arguments
  *
  * @author satya@ Satya Puniani
  */
-public class SimpleQueryExtractor {
+public class QueryParser {
 
+  //TODO strongly type these lists to Column and Operator
   private final LogicalOperator operator = LogicalOperator.AND;
   private final List<String> columnList = new ArrayList<>();
   private final List<String> operatorList = new ArrayList<>();
   private final List<String> argumentValueList = new ArrayList<>();
 
-  public SimpleQueryExtractor(Query query){
+  public QueryParser(Query query){
 
     //TODO get logical operator
 

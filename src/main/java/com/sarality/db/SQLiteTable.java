@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.sarality.db.content.ContentValuesPopulator;
 import com.sarality.db.cursor.CursorDataExtractor;
 import com.sarality.db.query.Query;
 

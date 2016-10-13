@@ -1,4 +1,4 @@
-package com.sarality.db;
+package com.sarality.db.content;
 
 import android.content.ContentValues;
 

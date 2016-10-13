@@ -15,7 +15,7 @@ public class TableSQLGenerator {
       if (columnIndex > 0) {
         builder.append(",\n");
       }
-      builder.append(column.getName()).append(" ").append(column.getDataType());
+      builder.append(column.getName()).append(" ").append(column.getDataType().getSqlType());
       if (column.isPrimary()) {
         builder.append(" PRIMARY KEY AUTOINCREMENT");
       } else if (column.isRequired()) {

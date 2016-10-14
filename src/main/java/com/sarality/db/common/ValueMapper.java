@@ -8,22 +8,30 @@ import java.util.Map;
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public class ValueMapper<I, O> {
+public class ValueMapper<V, M> {
 
-  private final Map<I, O> valueMap = new HashMap<>();
-  private final Map<O, I> mappedValueMap = new HashMap<>();
+  private final Map<M, V> valueLookupMap = new HashMap<>();
+  private final Map<V, M> mappedValueLookupMap = new HashMap<>();
 
-  public ValueMapper<I, O> withMapping(I input, O output) {
-    valueMap.put(input, output);
-    mappedValueMap.put(output, input);
+  public ValueMapper<V, M> withMapping(V value, M mappedValue) {
+    valueLookupMap.put(mappedValue, value);
+    mappedValueLookupMap.put(value, mappedValue);
     return this;
   }
 
-  public O getMappedValue(I input) {
-    return valueMap.get(input);
+  public M getMappedValue(V value) {
+    return mappedValueLookupMap.get(value);
   }
 
-  public I getValue(O output) {
-    return mappedValueMap.get(output);
+  public boolean hasMappedValue(V value) {
+    return mappedValueLookupMap.containsKey(value);
+  }
+
+  public V getValue(M mappedValue) {
+    return valueLookupMap.get(mappedValue);
+  }
+
+  public boolean hasValue(M mappedValue) {
+    return valueLookupMap.containsKey(mappedValue);
   }
 }

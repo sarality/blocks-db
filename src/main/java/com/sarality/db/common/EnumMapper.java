@@ -19,6 +19,10 @@ public class EnumMapper<V, T extends Enum<T>> extends ValueMapper<V, T> {
     return Enum.valueOf(enumClass, value);
   }
 
+  public Class<T> getEnumClass() {
+    return enumClass;
+  }
+
   @Override
   public EnumMapper<V, T> withMapping(V input, T output) {
     super.withMapping(input, output);

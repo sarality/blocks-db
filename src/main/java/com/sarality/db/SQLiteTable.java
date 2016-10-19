@@ -69,8 +69,11 @@ public class SQLiteTable<T> implements Table<T> {
   public synchronized final void close() {
     logger.debug("Closing database for Table {} ", tableDefinition.getTableName());
     if (dbOpenCounter.decrementAndGet() == 0) {
-      this.database.close();
-      logger.info("Closed database for Table {} ", tableDefinition.getTableName());
+      // TODO(abhideep): Check why this is null when Counter is not 0
+      if (this.database != null) {
+        this.database.close();
+        logger.info("Closed database for Table {} ", tableDefinition.getTableName());
+      }
     }
   }
 
@@ -111,6 +114,7 @@ public class SQLiteTable<T> implements Table<T> {
    */
   @Override
   public int delete(Query query) {
+    assertDatabaseOpen();
     return database.delete(tableDefinition.getTableName(), query.getWhereClause(), query.getWhereClauseArguments());
   }
 
@@ -122,6 +126,7 @@ public class SQLiteTable<T> implements Table<T> {
    */
   @Override
   public List<T> readAll(Query query) {
+    assertDatabaseOpen();
     Cursor cursor = null;
     List<T> dataList = new ArrayList<T>();
 

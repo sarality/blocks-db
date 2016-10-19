@@ -65,7 +65,7 @@ public class ContentValueWriter {
   public <V, T extends Enum<T>> void addEnum(Column column, V value, EnumMapper<V, T> mapper) {
     T mappedValue = mapper.getMappedValue(value);
     checkForRequiredColumn(column, mappedValue);
-    checkForColumnDataType(column, mapper.getEnumClass(), DataType.TEXT);
+    checkForColumnDataType(column, mapper.getEnumClass(), DataType.ENUM);
 
     String dbValue = null;
     if (mappedValue != null) {

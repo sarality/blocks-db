@@ -9,7 +9,7 @@ public class TableSQLGenerator {
 
   public static String getCreateSql(String tableName, Column[] columns) {
     StringBuilder builder = new StringBuilder("CREATE TABLE ");
-    builder.append(tableName).append("\n");
+    builder.append(tableName).append(" (\n");
     int columnIndex = 0;
     for (Column column: columns) {
       if (columnIndex > 0) {
@@ -23,6 +23,7 @@ public class TableSQLGenerator {
       }
       columnIndex++;
     }
+    builder.append(")");
     return builder.toString();
   }
 

@@ -1,5 +1,7 @@
 package com.sarality.db;
 
+import android.content.Context;
+
 import com.sarality.db.query.Query;
 
 import java.util.List;
@@ -11,15 +13,17 @@ import java.util.List;
  */
 public interface Table<T> {
 
-  Database getDatabase();
+  String getName();
 
   TableDefinition getTableDefinition();
 
-  String getName();
+  void initDatabase(Context context, DatabaseRegistry dbRegistry);
 
   void open();
 
   void close();
+
+  TransactionManager getTransactionManager();
 
   Long create(T data);
 

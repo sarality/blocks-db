@@ -1,5 +1,7 @@
 package com.sarality.db;
 
+import android.content.Context;
+
 import com.sarality.db.query.ParsedQuery;
 import com.sarality.db.query.Query;
 
@@ -17,18 +19,23 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class InMemoryTable<T> implements Table<T> {
 
   private static final AtomicLong PRIMARY_KEY = new AtomicLong(1000);
+
   private final Map<Long, T> dataMap = new LinkedHashMap<>();
+  private final TableDefinition tableDefinition;
+
+  private TransactionManager transactionManager;
+
+  public InMemoryTable(TableDefinition tableDefinition) {
+    this.tableDefinition = tableDefinition;
+  }
 
   public abstract void setId(T data, Long id);
 
   public abstract Column getPrimaryKey();
 
-  private final TableDefinition tableDefinition;
-
-  private Database db;
-
-  public InMemoryTable(TableDefinition tableDefinition) {
-    this.tableDefinition = tableDefinition;
+  @Override
+  public String getName() {
+    return tableDefinition.getTableName();
   }
 
   @Override
@@ -37,25 +44,25 @@ public abstract class InMemoryTable<T> implements Table<T> {
   }
 
   @Override
-  public String getName() {
-    return tableDefinition.getTableName();
-  }
-
-  @Override
-  public Database getDatabase() {
-    return db;
-  }
-
-  @Override
   public void open() {
-    this.db = new InMemoryDatabase(tableDefinition.getDatabaseName());
+    this.transactionManager = new InMemoryTransactionManager();
     // Nothing needs to be done here
   }
 
   @Override
   public void close() {
-    this.db = null;
+    this.transactionManager = null;
     // Nothing needs to be done here
+  }
+
+  @Override
+  public TransactionManager getTransactionManager() {
+    return transactionManager;
+  }
+
+  @Override
+  public void initDatabase(Context context, DatabaseRegistry dbRegistry) {
+    // Nothing needs to be done to initialize InMemoryTable
   }
 
   @Override

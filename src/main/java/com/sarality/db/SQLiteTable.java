@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Implementation of a table to store and query data from a SQLite database.
@@ -32,20 +31,24 @@ public class SQLiteTable<T> implements Table<T> {
   private final CursorDataExtractor<T> extractor;
   // Class to populate a Content Values from a data object.
   private final ContentValuesPopulator<T> populator;
+
   // Utility class used to access the underlying database as well as manage the schema of the table.
-  private final SQLiteDatabaseProvider dbProvider;
+  private SQLiteDatabaseProvider dbProvider;
 
   // Reference of the underlying database instance that is used to query and update the data.
   private SQLiteDatabase database;
-  private SQLiteDatabaseWrapper databaseWrapper;
-  private AtomicInteger dbOpenCounter = new AtomicInteger();
+  private SQLiteTransactionManager transactionManager;
 
   public SQLiteTable(Context context, TableDefinition tableDefinition,
       CursorDataExtractor<T> extractor, ContentValuesPopulator<T> populator) {
     this.tableDefinition = tableDefinition;
     this.extractor = extractor;
     this.populator = populator;
-    this.dbProvider = new SQLiteDatabaseProvider(context.getApplicationContext(), tableDefinition);
+  }
+
+  @Override
+  public String getName() {
+    return tableDefinition.getTableName();
   }
 
   @Override
@@ -61,22 +64,8 @@ public class SQLiteTable<T> implements Table<T> {
   @Override
   public synchronized final void open() throws SQLException {
     logger.info("Opening database for Table {} ", tableDefinition.getTableName());
-    if (dbOpenCounter.incrementAndGet() == 1) {
-      // This will automatically create or update the table as needed
-      this.database = dbProvider.getWritableDatabase();
-      this.databaseWrapper = new SQLiteDatabaseWrapper(tableDefinition.getDatabaseName(), database);
-      logger.info("Opened database for Table {} Open Counter {}", tableDefinition.getTableName(), dbOpenCounter.get());
-    }
-  }
-
-  @Override
-  public Database getDatabase() {
-    return databaseWrapper;
-  }
-
-  @Override
-  public String getName() {
-    return tableDefinition.getTableName();
+    this.database = dbProvider.getDatabase();
+    this.transactionManager = new SQLiteTransactionManager(database);
   }
 
   /**
@@ -85,22 +74,38 @@ public class SQLiteTable<T> implements Table<T> {
   @Override
   public synchronized final void close() {
     logger.debug("Closing database for Table {} ", tableDefinition.getTableName());
-    if (dbOpenCounter.decrementAndGet() == 0) {
-      // TODO(abhideep): Check why this is null when Counter is not 0
-      if (this.database != null) {
-        this.database.close();
-        logger.info("Closed database for Table {} ", tableDefinition.getTableName());
-      }
+    if (this.database != null && this.database.isOpen()) {
+      dbProvider.resetDatabase();
     }
+    this.database = null;
   }
 
   protected void assertDatabaseOpen() {
-    if (database == null) {
+    if (database == null || !database.isOpen()) {
       throw new IllegalStateException(
           "Cannot perform operation since the database was either not opened or has already been closed.");
     }
   }
 
+  public void initDatabase(Context context, DatabaseRegistry databaseRegistry) {
+    String dbName = tableDefinition.getDatabaseName();
+    int dbVersion = tableDefinition.getTableVersion();
+    databaseRegistry.init(tableDefinition, new SQLiteDatabaseProvider(context, dbName, dbVersion));
+
+    dbProvider = (SQLiteDatabaseProvider) databaseRegistry.getProvider(dbName);
+
+    // Just Open and close the Table to initialize the database
+    try {
+      open();
+    } finally {
+      close();
+    }
+  }
+
+  @Override
+  public TransactionManager getTransactionManager() {
+    return transactionManager;
+  }
 
   /**
    * Create a row in the database table.

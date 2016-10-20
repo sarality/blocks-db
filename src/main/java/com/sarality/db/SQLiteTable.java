@@ -37,6 +37,7 @@ public class SQLiteTable<T> implements Table<T> {
 
   // Reference of the underlying database instance that is used to query and update the data.
   private SQLiteDatabase database;
+  private SQLiteDatabaseWrapper databaseWrapper;
   private AtomicInteger dbOpenCounter = new AtomicInteger();
 
   public SQLiteTable(Context context, TableDefinition tableDefinition,
@@ -58,8 +59,19 @@ public class SQLiteTable<T> implements Table<T> {
     if (dbOpenCounter.incrementAndGet() == 1) {
       // This will automatically create or update the table as needed
       this.database = dbProvider.getWritableDatabase();
+      this.databaseWrapper = new SQLiteDatabaseWrapper(tableDefinition.getDatabaseName(), database);
       logger.info("Opened database for Table {} Open Counter {}", tableDefinition.getTableName(), dbOpenCounter.get());
     }
+  }
+
+  @Override
+  public Database getDatabase() {
+    return databaseWrapper;
+  }
+
+  @Override
+  public String getName() {
+    return tableDefinition.getTableName();
   }
 
   /**

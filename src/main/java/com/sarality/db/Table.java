@@ -1,8 +1,5 @@
 package com.sarality.db;
 
-import android.content.ContentValues;
-import android.database.Cursor;
-
 import com.sarality.db.query.Query;
 
 import java.util.List;
@@ -13,6 +10,10 @@ import java.util.List;
  * @author abhideep@ (Abhideep Singh)
  */
 public interface Table<T> {
+
+  Database getDatabase();
+
+  String getName();
 
   void open();
 

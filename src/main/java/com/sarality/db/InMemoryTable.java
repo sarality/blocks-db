@@ -17,19 +17,40 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class InMemoryTable<T> implements Table<T> {
 
   private static final AtomicLong PRIMARY_KEY = new AtomicLong(1000);
-  private Map<Long, T> dataMap = new LinkedHashMap<>();
+  private final Map<Long, T> dataMap = new LinkedHashMap<>();
 
   public abstract void setId(T data, Long id);
 
   public abstract Column getPrimaryKey();
 
+  private final String name;
+  private final String dbName;
+  private Database db;
+
+  public InMemoryTable(String name, String dbName) {
+    this.name = name;
+    this.dbName = dbName;
+  }
+
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public Database getDatabase() {
+    return db;
+  }
+
   @Override
   public void open() {
+    this.db = new InMemoryDatabase(dbName);
     // Nothing needs to be done here
   }
 
   @Override
   public void close() {
+    this.db = null;
     // Nothing needs to be done here
   }
 

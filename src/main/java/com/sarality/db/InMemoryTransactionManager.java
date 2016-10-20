@@ -1,21 +1,11 @@
 package com.sarality.db;
 
 /**
- * A database implementation for an InMemoryTable
+ * A transaction manager implementation for an InMemoryTable
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public class InMemoryDatabase implements Database {
-  private final String dbName;
-
-  public InMemoryDatabase(String dbName) {
-    this.dbName = dbName;
-  }
-
-  @Override
-  public String getName() {
-    return dbName;
-  }
+public class InMemoryTransactionManager implements TransactionManager {
 
   @Override
   public void beginTransaction() {

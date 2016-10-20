@@ -7,18 +7,11 @@ import android.database.sqlite.SQLiteDatabase;
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public class SQLiteDatabaseWrapper implements Database {
-  private final String name;
+public class SQLiteTransactionManager implements TransactionManager {
   private final SQLiteDatabase database;
 
-  public SQLiteDatabaseWrapper(String name, SQLiteDatabase database) {
-    this.name = name;
+  public SQLiteTransactionManager(SQLiteDatabase database) {
     this.database = database;
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override

@@ -1,13 +1,11 @@
 package com.sarality.db;
 
 /**
- * Interface for all databases in the system
+ * Interface for all classes that manage Transactions
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public interface Database {
-
-  String getName();
+public interface TransactionManager {
 
   void beginTransaction();
 

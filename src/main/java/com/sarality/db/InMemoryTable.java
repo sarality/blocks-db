@@ -23,18 +23,22 @@ public abstract class InMemoryTable<T> implements Table<T> {
 
   public abstract Column getPrimaryKey();
 
-  private final String name;
-  private final String dbName;
+  private final TableDefinition tableDefinition;
+
   private Database db;
 
-  public InMemoryTable(String name, String dbName) {
-    this.name = name;
-    this.dbName = dbName;
+  public InMemoryTable(TableDefinition tableDefinition) {
+    this.tableDefinition = tableDefinition;
+  }
+
+  @Override
+  public TableDefinition getTableDefinition() {
+    return tableDefinition;
   }
 
   @Override
   public String getName() {
-    return name;
+    return tableDefinition.getTableName();
   }
 
   @Override
@@ -44,7 +48,7 @@ public abstract class InMemoryTable<T> implements Table<T> {
 
   @Override
   public void open() {
-    this.db = new InMemoryDatabase(dbName);
+    this.db = new InMemoryDatabase(tableDefinition.getDatabaseName());
     // Nothing needs to be done here
   }
 

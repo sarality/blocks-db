@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class SQLiteTable<T> implements Table<T> {
 
-  private static final Logger logger = LoggerFactory.getLogger(SQLiteTable.class);
+  private static final Logger logger = LoggerFactory.getLogger(SQLiteTable.class.getSimpleName());
 
   // Metadata for the Table like table name and version.
   private final TableDefinition tableDefinition;
@@ -48,6 +48,11 @@ public class SQLiteTable<T> implements Table<T> {
     this.dbProvider = new SQLiteDatabaseProvider(context.getApplicationContext(), tableDefinition);
   }
 
+  @Override
+  public TableDefinition getTableDefinition() {
+    return tableDefinition;
+  }
+
   /**
    * Open a writable instance of the database.
    *
@@ -55,7 +60,7 @@ public class SQLiteTable<T> implements Table<T> {
    */
   @Override
   public synchronized final void open() throws SQLException {
-    logger.debug("Opening database for Table {} ", tableDefinition.getTableName());
+    logger.info("Opening database for Table {} ", tableDefinition.getTableName());
     if (dbOpenCounter.incrementAndGet() == 1) {
       // This will automatically create or update the table as needed
       this.database = dbProvider.getWritableDatabase();

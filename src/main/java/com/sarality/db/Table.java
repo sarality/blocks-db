@@ -13,6 +13,8 @@ public interface Table<T> {
 
   Database getDatabase();
 
+  TableDefinition getTableDefinition();
+
   String getName();
 
   void open();

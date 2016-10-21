@@ -86,7 +86,7 @@ public class CursorValueReader {
     if (prefix == null) {
       return column.getName();
     } else {
-      return prefix + "." + column.getName();
+      return prefix + "_" + column.getName();
     }
   }
 }

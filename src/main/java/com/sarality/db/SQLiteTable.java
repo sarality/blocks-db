@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.sarality.db.content.ContentValuesPopulator;
 import com.sarality.db.cursor.CursorDataExtractor;
 import com.sarality.db.query.Query;
+import com.sarality.db.query.RawQuery;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,6 +177,37 @@ public class SQLiteTable<T> implements Table<T> {
     return dataList;
   }
 
+
+  /**
+   * Retrieve the set of rows from the table for the given query.
+   *
+   * @param query Query to run on the table
+   * @return List of data that was returned for the query
+   */
+  public List<T> readAll(RawQuery query, CursorDataExtractor<T> extractor) {
+    assertDatabaseOpen();
+    Cursor cursor = null;
+    List<T> dataList = new ArrayList<T>();
+
+    try {
+      cursor = database.rawQuery(query.getQuery(), query.getQueryArguments());
+
+      cursor.moveToFirst();
+
+      while (!cursor.isAfterLast()) {
+        T data = extractor.extract(cursor, query);
+        dataList.add(data);
+        cursor.moveToNext();
+      }
+      logger.debug("Query on table {} returned {} values", getTableName(), dataList.size());
+    } finally {
+      // Make sure to close the cursor
+      if (cursor != null) {
+        cursor.close();
+      }
+    }
+    return dataList;
+  }
 
   /**
    * Update all rows that match the query with the data provided in the given data object.

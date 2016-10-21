@@ -7,6 +7,8 @@ package com.sarality.db;
  */
 public interface Column {
 
+  String getTableName();
+
   String getName();
 
   DataType getDataType();

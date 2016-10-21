@@ -20,6 +20,7 @@ public class SimpleJoinQueryBuilder {
 
   private final String tableName;
   private final List<String> tableList = new ArrayList<>();
+  private final List<Column[]> tableColumnList = new ArrayList<>();
   private final List<JoinType> joinTypeList = new ArrayList<>();
 
   private final List<Column> columnList = new ArrayList<>();
@@ -27,14 +28,16 @@ public class SimpleJoinQueryBuilder {
   private final List<String> argumentValueList = new ArrayList<>();
   private final List<Column> joinColumnList = new ArrayList<>();
 
-  public SimpleJoinQueryBuilder(String tableName, String tablePrefix) {
+  public SimpleJoinQueryBuilder(String tableName, String tablePrefix, Column[] columns) {
     this.operator = LogicalOperator.AND;
     this.tableName = tableName;
+    tableColumnList.add(columns);
     tablePrefixMap.put(tableName, tablePrefix);
   }
 
-  public SimpleJoinQueryBuilder join(String tableName, String tablePrefix, JoinType joinType) {
+  public SimpleJoinQueryBuilder join(String tableName, String tablePrefix, Column[] columns, JoinType joinType) {
     tableList.add(tableName);
+    tableColumnList.add(columns);
     tablePrefixMap.put(tableName, tablePrefix);
     joinTypeList.add(joinType);
     return this;
@@ -65,9 +68,21 @@ public class SimpleJoinQueryBuilder {
   }
 
   private String getSelectClause() {
-    StringBuilder builder = new StringBuilder("SELECT ").append(getTablePrefix(tableName)).append(".*");
-    for (String joinTable : tableList) {
-      builder.append(" , ").append(getTablePrefix(tableName)).append(".*");
+    StringBuilder builder = new StringBuilder("SELECT ");
+    int ctr = 0;
+    for (Column[] columns : tableColumnList) {
+      if (columns != null) {
+        for (Column column : columns) {
+          if (ctr > 0) {
+            builder.append(",");
+          }
+          String tableName = column.getTableName();
+          String prefix = getTablePrefix(tableName);
+          builder.append(" ").append(prefix).append(".").append(column.getName())
+              .append(" AS ").append(prefix).append("_").append(column.getName());
+          ctr++;
+        }
+      }
     }
     return builder.toString();
   }
@@ -77,7 +92,7 @@ public class SimpleJoinQueryBuilder {
         .append(getTablePrefix(tableName));
     int ctr = 0;
     for (String joinTable : tableList) {
-      builder.append(" ").append(joinTypeList.get(ctr).name()).append(" ").append(joinTable).append(" ")
+      builder.append(joinTypeList.get(ctr).getSQLString()).append(joinTable).append(" ")
           .append(getTablePrefix(joinTable));
       ctr++;
     }

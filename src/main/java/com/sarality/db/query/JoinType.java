@@ -7,7 +7,17 @@ package com.sarality.db.query;
  */
 
 public enum JoinType {
-  INNER,
-  LEFT_OUTER,  // Include all from Left even if there are no matching values in the Right
-  RIGHT_OUTER; // Include all from Right even if there are no matching values in the Left
+  INNER(" INNER JOIN "),
+  LEFT_OUTER(" LEFT OUTER JOIN "),  // Include all from Left even if there are no matching values in the Right
+  RIGHT_OUTER(" RIGHT OUT JOIN "); // Include all from Right even if there are no matching values in the Left
+
+  private final String sqlString;
+
+  JoinType(String sqlString) {
+    this.sqlString = sqlString;
+  }
+
+  public String getSQLString() {
+    return sqlString;
+  }
 }

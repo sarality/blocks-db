@@ -13,13 +13,19 @@ import com.sarality.db.common.EnumMapper;
  */
 public class CursorValueReader {
 
+  private final String prefix;
+
+  public CursorValueReader(String prefix) {
+    this.prefix = prefix;
+  }
+
   public Integer getInt(Cursor cursor, Column column) {
     // TODO: Move to a DataType based IntegerColumnValueReader
     if (!column.getDataType().equals(DataType.INTEGER)) {
       throw new IllegalStateException("Cannot extract Integer from Column " + column + " with data type "
           + column.getDataType());
     }
-    return cursor.getInt(cursor.getColumnIndex(column.getName()));
+    return cursor.getInt(cursor.getColumnIndex(getColumnName(column)));
   }
 
   public Long getLong(Cursor cursor, Column column) {
@@ -27,12 +33,12 @@ public class CursorValueReader {
       throw new IllegalStateException("Cannot extract Long from Column " + column + " with data type "
           + column.getDataType());
     }
-    return cursor.getLong(cursor.getColumnIndex(column.getName()));
+    return cursor.getLong(cursor.getColumnIndex(getColumnName(column)));
   }
 
   public String getString(Cursor cursor, Column column) {
     // TODO: Move to a DataType based TextColumnValueReader
-    return cursor.getString(cursor.getColumnIndex(column.getName()));
+    return cursor.getString(cursor.getColumnIndex(getColumnName(column)));
   }
 
   public Boolean getBoolean(Cursor cursor, Column column) {
@@ -42,9 +48,9 @@ public class CursorValueReader {
       if (column.isRequired() && value == null) {
         throw new IllegalStateException("Required column " + column + " has no value");
       }
-      return cursor.getInt(cursor.getColumnIndex(column.getName())) != 0;
+      return cursor.getInt(cursor.getColumnIndex(getColumnName(column))) != 0;
     } else if (column.getDataType().equals(DataType.TEXT)) {
-      return cursor.getString(cursor.getColumnIndex(column.getName())).equals(String.valueOf(Boolean.TRUE));
+      return cursor.getString(cursor.getColumnIndex(getColumnName(column))).equals(String.valueOf(Boolean.TRUE));
     } else {
       throw new IllegalStateException("Cannot extract boolean from Column " + column + " with data type "
           + column.getDataType());
@@ -74,5 +80,13 @@ public class CursorValueReader {
       return mapper.getValue(enumValue);
     }
     throw new IllegalStateException("No mapped value for " + dbValue + " in Column " + column);
+  }
+
+  private String getColumnName(Column column) {
+    if (prefix == null) {
+      return column.getName();
+    } else {
+      return prefix + "." + column.getName();
+    }
   }
 }

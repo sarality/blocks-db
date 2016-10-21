@@ -15,6 +15,11 @@ import com.sarality.db.query.Query;
 public interface CursorDataExtractor<T> {
 
   /**
+   * @return Prefix to use when looking us column in a cursor
+   */
+  String getColumnPrefix();
+
+  /**
    * Extract an object of the given type from the cursor that was returned by running the given query.
    * @param cursor The cursor to extract data from
    * @param query The query that generated this cursor

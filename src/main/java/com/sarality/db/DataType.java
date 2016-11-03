@@ -6,9 +6,12 @@ package com.sarality.db;
  * @author abhideep@ (Abhideep Singh)
  */
 public enum DataType {
+  BIT_MASK("INTEGER"),
+  DATE_AS_INT("INTEGER"),
+  DATETIME("TEXT"),
+  ENUM("TEXT"),
   INTEGER("INTEGER"),
-  TEXT("TEXT"),
-  ENUM("TEXT");
+  TEXT("TEXT");
 
   private final String sqlType;
 

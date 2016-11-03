@@ -4,6 +4,7 @@ import android.content.ContentValues;
 
 import com.sarality.db.Column;
 import com.sarality.db.common.EnumMapper;
+import com.sarality.db.io.BooleanColumn;
 import com.sarality.db.io.ColumnValueWriter;
 import com.sarality.db.io.DateTimeColumn;
 import com.sarality.db.io.DoubleColumn;
@@ -64,7 +65,7 @@ public class ContentValueWriter {
   }
 
   public <T extends Enum<T>> void addBoolean(Column column, Boolean value, EnumMapper<Boolean, T> mapper) {
-    ColumnValueWriter<Boolean> writer = new EnumColumn<>(null, mapper);
+    ColumnValueWriter<Boolean> writer = new BooleanColumn<>(null, mapper);
     writer.setValue(contentValues, column, value);
   }
 }

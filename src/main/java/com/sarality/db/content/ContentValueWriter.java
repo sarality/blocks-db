@@ -3,9 +3,16 @@ package com.sarality.db.content;
 import android.content.ContentValues;
 
 import com.sarality.db.Column;
-import com.sarality.db.DataType;
-import com.sarality.db.common.BooleanEnum;
 import com.sarality.db.common.EnumMapper;
+import com.sarality.db.io.BooleanColumn;
+import com.sarality.db.io.DateTimeColumn;
+import com.sarality.db.io.DoubleColumn;
+import com.sarality.db.io.EnumColumn;
+import com.sarality.db.io.IntegerColumn;
+import com.sarality.db.io.LongColumn;
+import com.sarality.db.io.StringColumn;
+
+import hirondelle.date4j.DateTime;
 
 /**
  * Utility to add values to a ContentValues object
@@ -14,6 +21,14 @@ import com.sarality.db.common.EnumMapper;
  */
 public class ContentValueWriter {
 
+  private static final StringColumn STRING_COLUMN = new StringColumn();
+  private static final IntegerColumn INTEGER_COLUMN = new IntegerColumn();
+  private static final LongColumn LONG_COLUMN = new LongColumn();
+  private static final DoubleColumn DOUBLE_COLUMN = new DoubleColumn();
+  private static final DateTimeColumn DATE_TIME_COLUMN = new DateTimeColumn();
+  private static final BooleanColumn BOOLEAN_COLUMN = new BooleanColumn();
+  private static final EnumColumn ENUM_COLUMN = new EnumColumn();
+
   private final ContentValues contentValues;
 
   public ContentValueWriter(ContentValues contentValues) {
@@ -21,70 +36,30 @@ public class ContentValueWriter {
   }
 
   public void addString(Column column, String value) {
-    checkForRequiredColumn(column, value);
-    checkForColumnDataType(column, String.class, DataType.TEXT);
-
-    contentValues.put(column.getName(), value);
-  }
-
-  public void addLong(Column column, Long value) {
-    checkForRequiredColumn(column, value);
-    checkForColumnDataType(column, Long.class, DataType.INTEGER);
-
-    contentValues.put(column.getName(), value);
+    STRING_COLUMN.setValue(contentValues, column, value);
   }
 
   public void addInt(Column column, Integer value) {
-    checkForRequiredColumn(column, value);
-    checkForColumnDataType(column, Integer.class, DataType.INTEGER);
-
-    contentValues.put(column.getName(), value);
+    INTEGER_COLUMN.setValue(contentValues, column, value);
   }
 
-  public void addBoolean(Column column, Boolean value) {
-    checkForRequiredColumn(column, value);
+  public void addLong(Column column, Long value) {
+    LONG_COLUMN.setValue(contentValues, column, value);
+  }
 
-    if (column.getDataType() == DataType.INTEGER) {
-      if (value.equals(Boolean.FALSE)) {
-        contentValues.put(column.getName(), 0);
-      } else if (value.equals(Boolean.TRUE)) {
-        contentValues.put(column.getName(), 1);
-      }
-    } else if (column.getDataType() == DataType.TEXT || column.getDataType() == DataType.ENUM) {
-      if (value.equals(Boolean.FALSE)) {
-        contentValues.put(column.getName(), BooleanEnum.FALSE.name());
-      } else if (value.equals(Boolean.TRUE)) {
-        contentValues.put(column.getName(), BooleanEnum.TRUE.name());
-      }
-    } else {
-      throw new IllegalStateException("Cannot set Boolean value for Column " + column.getName() + " with data type "
-          + column.getDataType());
-    }
+  public void addDouble(Column column, Double value) {
+    DOUBLE_COLUMN.setValue(contentValues, column, value);
+  }
+
+  public void addDate(Column column, DateTime value) {
+    DATE_TIME_COLUMN.setValue(contentValues, column, value);
   }
 
   public <V, T extends Enum<T>> void addEnum(Column column, V value, EnumMapper<V, T> mapper) {
-    T mappedValue = mapper.getMappedValue(value);
-    checkForRequiredColumn(column, mappedValue);
-    checkForColumnDataType(column, mapper.getEnumClass(), DataType.ENUM);
-
-    String dbValue = null;
-    if (mappedValue != null) {
-      dbValue = mappedValue.name();
-    }
-    contentValues.put(column.getName(), dbValue);
+    ENUM_COLUMN.setValue(contentValues, column, value, mapper);
   }
 
-  private <V> void checkForRequiredColumn(Column column, V value) {
-    if (column.isRequired() && value == null) {
-      throw new IllegalArgumentException("Cannot add null value to required Column " + column.getName());
-    }
+  public <T extends Enum<T>> void addBoolean(Column column, Boolean value, EnumMapper<Boolean, T> mapper) {
+    BOOLEAN_COLUMN.setValue(contentValues, column, value, mapper);
   }
-
-  private void checkForColumnDataType(Column column, Class<?> valueClass, DataType dataType) {
-    if (column.getDataType() != dataType) {
-      throw new IllegalArgumentException("Cannot add " + valueClass.getSimpleName() + " value to Column " +
-          column.getName() + " with data type " + column.getDataType());
-    }
-  }
-
 }

@@ -13,27 +13,33 @@ import hirondelle.date4j.DateTime;
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public class DateTimeColumn extends BaseColumn {
+public class DateTimeColumn extends BaseColumn implements ColumnValueReader<DateTime>, ColumnValueWriter<DateTime> {
 
   private static final String ISO_8601_DATE_TIME = "YYYY-MM-DD HH:MM:SS";
 
-  public DateTime getValue(Cursor cursor, Column column, String prefix) {
+  public DateTimeColumn(String prefix) {
+    super(prefix);
+  }
+
+  @Override
+  public DateTime getValue(Cursor cursor, Column column) {
     DataType dataType = column.getDataType();
     if (dataType.equals(DataType.DATE_AS_INT)) {
-      int date = cursor.getInt(cursor.getColumnIndex(getColumnName(column, prefix)));
+      int date = cursor.getInt(cursor.getColumnIndex(getColumnName(column)));
       int day = date % 100;
       int month = (date - day) % 10000;
       int year = date / 10000;
 
       return DateTime.forDateOnly(year, month, day);
     } else if (dataType.equals(DataType.DATETIME)) {
-      String date = cursor.getString(cursor.getColumnIndex(getColumnName(column, prefix)));
+      String date = cursor.getString(cursor.getColumnIndex(getColumnName(column)));
       return new DateTime(date);
     } else {
       throw new IllegalStateException("Cannot extract Date from Column " + column + " with data type " + dataType);
     }
   }
 
+  @Override
   public void setValue(ContentValues contentValues, Column column, DateTime value) {
     checkForRequiredColumn(column, value);
 

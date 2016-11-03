@@ -11,7 +11,13 @@ import com.sarality.db.DataType;
 
 class BaseColumn {
 
-  String getColumnName(Column column, String prefix) {
+  private final String prefix;
+
+  public BaseColumn(String prefix) {
+    this.prefix = prefix;
+  }
+
+  String getColumnName(Column column) {
     if (prefix == null) {
       return column.getName();
     } else {

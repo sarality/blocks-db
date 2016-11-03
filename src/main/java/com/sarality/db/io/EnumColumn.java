@@ -12,10 +12,18 @@ import com.sarality.db.common.EnumMapper;
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public class EnumColumn extends BaseColumn {
+public class EnumColumn<V, T extends Enum<T>> extends BaseColumn implements ColumnValueReader<V>,
+    ColumnValueWriter<V> {
 
-  public <V, T extends Enum<T>> V getValue(Cursor cursor, Column column, String prefix,
-      EnumMapper<V, T> mapper) {
+  private final EnumMapper<V, T> mapper;
+
+  public EnumColumn(String prefix, EnumMapper<V, T> mapper) {
+    super(prefix);
+    this.mapper = mapper;
+  }
+
+  @Override
+  public V getValue(Cursor cursor, Column column) {
     if (!column.getDataType().equals(DataType.ENUM)) {
       throw new IllegalStateException("Cannot extract boolean from Column " + column + " with data type "
           + column.getDataType() + " using this method");
@@ -24,7 +32,7 @@ public class EnumColumn extends BaseColumn {
       throw new IllegalArgumentException("Cannot extract boolean value from Column " + column
           + " with a way to may Enum value to Boolean values");
     }
-    String dbValue = cursor.getString(cursor.getColumnIndex(getColumnName(column, prefix)));
+    String dbValue = cursor.getString(cursor.getColumnIndex(getColumnName(column)));
     if (dbValue == null) {
       return null;
     }
@@ -40,8 +48,8 @@ public class EnumColumn extends BaseColumn {
     throw new IllegalStateException("No mapped value for " + dbValue + " in Column " + column);
   }
 
-  public <V, T extends Enum<T>> void setValue(ContentValues contentValues, Column column, V value,
-      EnumMapper<V, T> mapper) {
+  @Override
+  public void setValue(ContentValues contentValues, Column column, V value) {
     T mappedValue = mapper.getMappedValue(value);
     checkForRequiredColumn(column, mappedValue);
     checkForColumnDataType(column, mapper.getEnumClass(), DataType.ENUM);

@@ -11,6 +11,7 @@ import com.sarality.db.io.ColumnValueReader;
 import com.sarality.db.io.DateTimeColumn;
 import com.sarality.db.io.DoubleColumn;
 import com.sarality.db.io.EnumColumn;
+import com.sarality.db.io.MappedEnumColumn;
 import com.sarality.db.io.IntegerColumn;
 import com.sarality.db.io.LongColumn;
 import com.sarality.db.io.StringColumn;
@@ -68,8 +69,13 @@ public class CursorValueReader {
     return reader.getValue(cursor, column);
   }
 
-  public <V, T extends Enum<T>> V getEnumValue(Cursor cursor, Column column, EnumMapper<V, T> mapper) {
-    ColumnValueReader<V> reader = new EnumColumn<>(prefix, mapper);
+  public <V, T extends Enum<T>> V getEnum(Cursor cursor, Column column, EnumMapper<V, T> mapper) {
+    ColumnValueReader<V> reader = new MappedEnumColumn<>(prefix, mapper);
+    return reader.getValue(cursor, column);
+  }
+
+  public <T extends Enum<T>> T getEnum(Cursor cursor, Column column, Class<T> enumClass) {
+    ColumnValueReader<T> reader = new EnumColumn<>(prefix, enumClass);
     return reader.getValue(cursor, column);
   }
 

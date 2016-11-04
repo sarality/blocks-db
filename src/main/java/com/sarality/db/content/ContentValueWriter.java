@@ -11,6 +11,7 @@ import com.sarality.db.io.ColumnValueWriter;
 import com.sarality.db.io.DateTimeColumn;
 import com.sarality.db.io.DoubleColumn;
 import com.sarality.db.io.EnumColumn;
+import com.sarality.db.io.MappedEnumColumn;
 import com.sarality.db.io.IntegerColumn;
 import com.sarality.db.io.LongColumn;
 import com.sarality.db.io.StringColumn;
@@ -69,7 +70,12 @@ public class ContentValueWriter {
   }
 
   public <V, T extends Enum<T>> void addEnum(Column column, V value, EnumMapper<V, T> mapper) {
-    ColumnValueWriter<V> writer = new EnumColumn<>(null, mapper);
+    ColumnValueWriter<V> writer = new MappedEnumColumn<>(null, mapper);
+    writer.setValue(contentValues, column, value);
+  }
+
+  public <T extends Enum<T>> void addEnum(Column column, T value) {
+    ColumnValueWriter<T> writer = new EnumColumn<>(null, null);
     writer.setValue(contentValues, column, value);
   }
 

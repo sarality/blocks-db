@@ -4,6 +4,8 @@ import android.content.ContentValues;
 
 import com.sarality.db.Column;
 import com.sarality.db.common.EnumMapper;
+import com.sarality.db.io.BitMaskColumn;
+import com.sarality.db.io.BitPosition;
 import com.sarality.db.io.BooleanColumn;
 import com.sarality.db.io.ColumnValueWriter;
 import com.sarality.db.io.DateTimeColumn;
@@ -12,6 +14,8 @@ import com.sarality.db.io.EnumColumn;
 import com.sarality.db.io.IntegerColumn;
 import com.sarality.db.io.LongColumn;
 import com.sarality.db.io.StringColumn;
+
+import java.util.Set;
 
 import hirondelle.date4j.DateTime;
 
@@ -59,13 +63,18 @@ public class ContentValueWriter {
     dateColumnValueWriter.setValue(contentValues, column, value);
   }
 
+  public <T extends Enum<T>> void addBoolean(Column column, Boolean value, EnumMapper<Boolean, T> mapper) {
+    ColumnValueWriter<Boolean> writer = new BooleanColumn<>(null, mapper);
+    writer.setValue(contentValues, column, value);
+  }
+
   public <V, T extends Enum<T>> void addEnum(Column column, V value, EnumMapper<V, T> mapper) {
     ColumnValueWriter<V> writer = new EnumColumn<>(null, mapper);
     writer.setValue(contentValues, column, value);
   }
 
-  public <T extends Enum<T>> void addBoolean(Column column, Boolean value, EnumMapper<Boolean, T> mapper) {
-    ColumnValueWriter<Boolean> writer = new BooleanColumn<>(null, mapper);
-    writer.setValue(contentValues, column, value);
+  public <T extends Enum<T>> void addEnumSet(Column column, Set<T> values, EnumMapper<BitPosition, T> mapper) {
+    ColumnValueWriter<Set<T>> writer = new BitMaskColumn<>(null, mapper);
+    writer.setValue(contentValues, column, values);
   }
 }

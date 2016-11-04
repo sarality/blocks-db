@@ -4,6 +4,8 @@ import android.database.Cursor;
 
 import com.sarality.db.Column;
 import com.sarality.db.common.EnumMapper;
+import com.sarality.db.io.BitMaskColumn;
+import com.sarality.db.io.BitPosition;
 import com.sarality.db.io.BooleanColumn;
 import com.sarality.db.io.ColumnValueReader;
 import com.sarality.db.io.DateTimeColumn;
@@ -12,6 +14,8 @@ import com.sarality.db.io.EnumColumn;
 import com.sarality.db.io.IntegerColumn;
 import com.sarality.db.io.LongColumn;
 import com.sarality.db.io.StringColumn;
+
+import java.util.Set;
 
 import hirondelle.date4j.DateTime;
 
@@ -64,8 +68,13 @@ public class CursorValueReader {
     return reader.getValue(cursor, column);
   }
 
-  public <V, T extends Enum<T>> V getEnum(Cursor cursor, Column column, EnumMapper<V, T> mapper) {
+  public <V, T extends Enum<T>> V getEnumValue(Cursor cursor, Column column, EnumMapper<V, T> mapper) {
     ColumnValueReader<V> reader = new EnumColumn<>(prefix, mapper);
+    return reader.getValue(cursor, column);
+  }
+
+  public <T extends Enum<T>> Set<T> getEnumSet(Cursor cursor, Column column, EnumMapper<BitPosition, T> mapper) {
+    ColumnValueReader<Set<T>> reader = new BitMaskColumn<>(prefix, mapper);
     return reader.getValue(cursor, column);
   }
 }

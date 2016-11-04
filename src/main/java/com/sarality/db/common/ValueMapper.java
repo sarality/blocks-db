@@ -2,6 +2,7 @@ package com.sarality.db.common;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Maps values used in Data Object to values in used the DB and vice versa.
@@ -33,5 +34,13 @@ public class ValueMapper<V, M> {
 
   public boolean hasValue(M mappedValue) {
     return valueLookupMap.containsKey(mappedValue);
+  }
+
+  public Set<V> getValues() {
+    return mappedValueLookupMap.keySet();
+  }
+
+  public Set<M> getMappedValues() {
+    return valueLookupMap.keySet();
   }
 }

@@ -12,14 +12,19 @@ import com.sarality.db.DataType;
  * @author abhideep@ (Abhideep Singh)
  */
 
-public class DoubleColumn extends BaseColumn {
+public class DoubleColumn extends BaseColumn implements ColumnValueReader<Double>, ColumnValueWriter<Double> {
 
-  public Double getValue(Cursor cursor, Column column, String prefix) {
+  public DoubleColumn(String prefix) {
+    super(prefix);
+  }
+
+  @Override
+  public Double getValue(Cursor cursor, Column column) {
     if (!column.getDataType().equals(DataType.INTEGER)) {
       throw new IllegalStateException("Cannot extract Double from Column " + column + " with data type "
           + column.getDataType());
     }
-    return cursor.getDouble(cursor.getColumnIndex(getColumnName(column, prefix)));
+    return cursor.getDouble(cursor.getColumnIndex(getColumnName(column)));
   }
 
   public void setValue(ContentValues contentValues, Column column, Double value) {

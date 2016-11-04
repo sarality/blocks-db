@@ -11,12 +11,18 @@ import com.sarality.db.DataType;
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public class StringColumn extends BaseColumn {
+public class StringColumn extends BaseColumn implements ColumnValueReader<String>, ColumnValueWriter<String> {
 
-  public String getValue(Cursor cursor, Column column, String prefix) {
-    return cursor.getString(cursor.getColumnIndex(getColumnName(column, prefix)));
+  public StringColumn(String prefix) {
+    super(prefix);
   }
 
+  @Override
+  public String getValue(Cursor cursor, Column column) {
+    return cursor.getString(cursor.getColumnIndex(getColumnName(column)));
+  }
+
+  @Override
   public void setValue(ContentValues contentValues, Column column, String value) {
     checkForRequiredColumn(column, value);
     checkForColumnDataType(column, String.class, DataType.TEXT);

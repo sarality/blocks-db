@@ -5,6 +5,8 @@ import com.sarality.db.Column;
 import java.util.ArrayList;
 import java.util.List;
 
+import hirondelle.date4j.DateTime;
+
 /**
  * A builder to generate where clause String and the argument values for the where clause.
  *
@@ -13,9 +15,7 @@ import java.util.List;
 public class SimpleQueryBuilder {
 
   private final LogicalOperator operator;
-  private final List<Column> columnList = new ArrayList<>();
-  private final List<Operator> operatorList = new ArrayList<>();
-  private final List<String> argumentValueList = new ArrayList<>();
+  private final List<QueryClause> clauseList = new ArrayList<>();
 
   public SimpleQueryBuilder() {
     this(LogicalOperator.AND);
@@ -26,39 +26,46 @@ public class SimpleQueryBuilder {
   }
 
   public SimpleQueryBuilder withFilter(Column column, Long value) {
-    return withFilter(column, Operator.EQUALS, String.valueOf(value));
+    return withFilter(column, Operator.EQUALS, value);
   }
 
   public SimpleQueryBuilder withFilter(Column column, Operator operator, String value) {
-    columnList.add(column);
-    operatorList.add(operator);
-    argumentValueList.add(value);
+    return withFilter(new SimpleQueryClause(column, operator, value));
+  }
+
+  public SimpleQueryBuilder withFilter(Column column, Operator operator, Long value) {
+    return withFilter(new SimpleQueryClause(column, operator, value));
+  }
+
+  public SimpleQueryBuilder withFilter(Column column, Operator operator, DateTime value) {
+    return withFilter(new SimpleQueryClause(column, operator, value));
+  }
+
+  public SimpleQueryBuilder withFilter(QueryClause clauseBuilder) {
+    clauseList.add(clauseBuilder);
     return this;
   }
 
   private String getWhereClause() {
-    if (columnList.isEmpty()) {
+    QueryClause clause = null;
+    if (clauseList.size() == 1) {
+      clause = clauseList.get(0);
+    } else if (clauseList.size() > 1) {
+      clause = new CompoundQueryClause(operator, clauseList);
+    }
+    if (clause == null) {
       return null;
     }
-    StringBuilder builder = new StringBuilder();
-    int numFilters = columnList.size();
-    for (int ctr = 0; ctr < numFilters; ctr++) {
-      Column column = columnList.get(ctr);
-      Operator filterOperator = operatorList.get(ctr);
-
-      if (ctr > 0) {
-        builder.append(" ").append(operator.toString()).append(" ");
-      }
-      builder.append(column.getName()).append(" ").append(filterOperator.getSqlString()).append(" ?");
-    }
-    return builder.toString();
+    return clause.getSelection();
   }
 
   private String[] getArguments() {
-    if (argumentValueList.isEmpty()) {
+    QueryClause  clause = new CompoundQueryClause(operator, clauseList);
+    List<String> argumentList = clause.getSelectionArguments();
+    if (argumentList == null || argumentList.isEmpty()) {
       return null;
     }
-    return argumentValueList.toArray(new String[argumentValueList.size()]);
+    return argumentList.toArray(new String[argumentList.size()]);
   }
 
   public Query build() {

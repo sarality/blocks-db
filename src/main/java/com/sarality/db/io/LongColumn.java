@@ -11,7 +11,8 @@ import com.sarality.db.DataType;
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public class LongColumn extends BaseColumn implements ColumnValueReader<Long>, ColumnValueWriter<Long> {
+public class LongColumn extends BaseColumn implements ColumnValueReader<Long>, ColumnValueWriter<Long>,
+    ColumnValueFormatter<Long> {
 
   public LongColumn(String prefix) {
     super(prefix);
@@ -24,6 +25,11 @@ public class LongColumn extends BaseColumn implements ColumnValueReader<Long>, C
           + column.getDataType());
     }
     return cursor.getLong(cursor.getColumnIndex(getColumnName(column)));
+  }
+
+  @Override
+  public String getQueryArgValue(Column column, Long value) {
+    return String.valueOf(value);
   }
 
   @Override

@@ -11,6 +11,7 @@ public enum DataType {
   DATETIME("TEXT"),
   ENUM("TEXT"),
   INTEGER("INTEGER"),
+  DOUBLE("REAL"),
   TEXT("TEXT");
 
   private final String sqlType;

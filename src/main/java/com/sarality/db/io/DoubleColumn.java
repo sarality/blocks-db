@@ -20,7 +20,7 @@ public class DoubleColumn extends BaseColumn implements ColumnValueReader<Double
 
   @Override
   public Double getValue(Cursor cursor, Column column) {
-    if (!column.getDataType().equals(DataType.INTEGER)) {
+    if (!column.getDataType().equals(DataType.DOUBLE)) {
       throw new IllegalStateException("Cannot extract Double from Column " + column + " with data type "
           + column.getDataType());
     }
@@ -29,7 +29,7 @@ public class DoubleColumn extends BaseColumn implements ColumnValueReader<Double
 
   public void setValue(ContentValues contentValues, Column column, Double value) {
     checkForRequiredColumn(column, value);
-    checkForColumnDataType(column, Double.class, DataType.INTEGER);
+    checkForColumnDataType(column, Double.class, DataType.DOUBLE);
 
     contentValues.put(column.getName(), value);
   }

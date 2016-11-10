@@ -13,7 +13,8 @@ import hirondelle.date4j.DateTime;
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public class DateTimeColumn extends BaseColumn implements ColumnValueReader<DateTime>, ColumnValueWriter<DateTime> {
+public class DateTimeColumn extends BaseColumn implements ColumnValueReader<DateTime>, ColumnValueWriter<DateTime>,
+    ColumnValueFormatter<DateTime> {
 
   private static final String ISO_8601_DATE_TIME = "YYYY-MM-DD HH:MM:SS";
 
@@ -40,20 +41,38 @@ public class DateTimeColumn extends BaseColumn implements ColumnValueReader<Date
   }
 
   @Override
+  public String getQueryArgValue(Column column, DateTime value) {
+    if (column.getDataType().equals(DataType.DATE_AS_INT)) {
+      return String.valueOf(getDateAsIntValue(value));
+    } else if (column.getDataType().equals(DataType.DATETIME)) {
+      return getDateAsStringValue(value);
+    } else {
+      throw new IllegalArgumentException("Cannot query Column " + column.getName()
+          + " with data type " + column.getDataType() + " using DateTime value");
+    }
+  }
+
+  @Override
   public void setValue(ContentValues contentValues, Column column, DateTime value) {
     checkForRequiredColumn(column, value);
 
     if (column.getDataType().equals(DataType.DATE_AS_INT)) {
-      int year = value.getYear() * 10000;
-      int month = value.getMonth() * 100;
-      int date = year + month + value.getDay();
-      contentValues.put(column.getName(), date);
-    } else if (column.getDataType().equals(DataType.DATE_AS_INT)) {
-      String date = value.format(ISO_8601_DATE_TIME);
-      contentValues.put(column.getName(), date);
+      contentValues.put(column.getName(), getDateAsIntValue(value));
+    } else if (column.getDataType().equals(DataType.DATETIME)) {
+      contentValues.put(column.getName(), getDateAsStringValue(value));
     } else {
       throw new IllegalArgumentException("Cannot add DateTime value to Column " + column.getName() +
           " with data type " + column.getDataType());
     }
+  }
+
+  private int getDateAsIntValue(DateTime value) {
+    int year = value.getYear() * 10000;
+    int month = value.getMonth() * 100;
+    return year + month + value.getDay();
+  }
+
+  private String getDateAsStringValue(DateTime value) {
+    return value.format(ISO_8601_DATE_TIME);
   }
 }

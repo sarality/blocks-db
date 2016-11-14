@@ -1,11 +1,14 @@
 package com.sarality.db.query;
 
 import com.sarality.db.Column;
+import com.sarality.db.io.DateTimeColumn;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import hirondelle.date4j.DateTime;
 
 /**
  * A builder to generate where clause String and the argument values for the where clause.
@@ -61,6 +64,10 @@ public class SimpleJoinQueryBuilder {
     argumentValueList.add(value);
     joinColumnList.add(null);
     return this;
+  }
+
+  public SimpleJoinQueryBuilder withFilter(Column column, Operator operator, DateTime value) {
+    return withFilter(column, operator, new DateTimeColumn(null).getQueryArgValue(column,value));
   }
 
   public String getTablePrefix(String tableName) {

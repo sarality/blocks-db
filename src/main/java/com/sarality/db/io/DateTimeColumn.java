@@ -27,9 +27,9 @@ public class DateTimeColumn extends BaseColumn implements ColumnValueReader<Date
     DataType dataType = column.getDataType();
     if (dataType.equals(DataType.DATE_AS_INT)) {
       int date = cursor.getInt(cursor.getColumnIndex(getColumnName(column)));
-      int day = date % 100;
-      int month = (date - day) % 10000;
       int year = date / 10000;
+      int month = (date - year * 10000) / 100;
+      int day = date % 100;
 
       return DateTime.forDateOnly(year, month, day);
     } else if (dataType.equals(DataType.DATETIME)) {

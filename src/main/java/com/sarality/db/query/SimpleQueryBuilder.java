@@ -53,7 +53,7 @@ public class SimpleQueryBuilder {
     return this;
   }
 
-  public SimpleQueryBuilder withGroupBy(Column dimension) {
+  public SimpleQueryBuilder groupBy(Column dimension) {
     groupByColumnList.add(dimension);
     return this;
   }

@@ -48,39 +48,84 @@ public class CursorValueReader {
     return stringColumnValueReader.getValue(cursor, column);
   }
 
+  public String getString(Cursor cursor, Column column, String prefix) {
+    return new StringColumn(prefix).getValue(cursor, column);
+  }
+
   public Integer getInt(Cursor cursor, Column column) {
     return intColumnValueReader.getValue(cursor, column);
+  }
+
+  public Integer getInt(Cursor cursor, Column column, String prefix) {
+    return new IntegerColumn(prefix).getValue(cursor, column);
   }
 
   public Long getLong(Cursor cursor, Column column) {
     return longColumnValueReader.getValue(cursor, column);
   }
 
+  public Long getLong(Cursor cursor, Column column, String prefix) {
+    return new LongColumn(prefix).getValue(cursor, column);
+  }
+
+
   public Double getDouble(Cursor cursor, Column column) {
     return doubleColumnValueReader.getValue(cursor, column);
+  }
+
+
+  public Double getDouble(Cursor cursor, Column column, String prefix) {
+    DoubleColumn prefixedDoubleColumnReader = new DoubleColumn(prefix);
+    return prefixedDoubleColumnReader.getValue(cursor, column);
   }
 
   public DateTime getDate(Cursor cursor, Column column) {
     return dateColumnValueReader.getValue(cursor, column);
   }
 
+  public DateTime getDate(Cursor cursor, Column column, String prefix) {
+    return new DateTimeColumn(prefix).getValue(cursor, column);
+  }
+
   public <T extends Enum<T>> Boolean getBoolean(Cursor cursor, Column column, EnumMapper<Boolean, T> mapper) {
+    return getBoolean(cursor, column, mapper, this.prefix);
+  }
+
+  public <T extends Enum<T>> Boolean getBoolean(Cursor cursor, Column column, EnumMapper<Boolean, T> mapper, String
+      prefix) {
     ColumnValueReader<Boolean> reader = new BooleanColumn<>(prefix, mapper);
     return reader.getValue(cursor, column);
   }
 
-  public <V, T extends Enum<T>> V getEnum(Cursor cursor, Column column, EnumMapper<V, T> mapper) {
+  public <V, T extends Enum<T>> V getEnum(Cursor cursor, Column column, EnumMapper<V, T> mapper, String prefix) {
     ColumnValueReader<V> reader = new MappedEnumColumn<>(prefix, mapper);
     return reader.getValue(cursor, column);
   }
 
-  public <T extends Enum<T>> T getEnum(Cursor cursor, Column column, Class<T> enumClass) {
+  public <V, T extends Enum<T>> V getEnum(Cursor cursor, Column column, EnumMapper<V, T> mapper) {
+    return getEnum(cursor, column, mapper, this.prefix);
+  }
+
+
+  public <T extends Enum<T>> T getEnum(Cursor cursor, Column column, Class<T> enumClass, String prefix) {
     ColumnValueReader<T> reader = new EnumColumn<>(prefix, enumClass);
     return reader.getValue(cursor, column);
   }
 
-  public <T extends Enum<T>> Set<T> getEnumSet(Cursor cursor, Column column, EnumMapper<BitPosition, T> mapper) {
+  public <T extends Enum<T>> T getEnum(Cursor cursor, Column column, Class<T> enumClass) {
+    return getEnum(cursor, column, enumClass, this.prefix);
+  }
+
+
+  public <T extends Enum<T>> Set<T> getEnumSet(Cursor cursor, Column column, EnumMapper<BitPosition, T> mapper,
+      String prefix) {
     ColumnValueReader<Set<T>> reader = new BitMaskColumn<>(prefix, mapper);
     return reader.getValue(cursor, column);
   }
+
+  public <T extends Enum<T>> Set<T> getEnumSet(Cursor cursor, Column column, EnumMapper<BitPosition, T> mapper) {
+    return getEnumSet(cursor, column, mapper, this.prefix);
+  }
+
+
 }

@@ -16,6 +16,8 @@ public class SimpleQueryBuilder {
 
   private final LogicalOperator operator;
   private final List<QueryClause> clauseList = new ArrayList<>();
+  private final List<String> tableColumnList = new ArrayList<>();
+  private final List<Column> groupByColumnList = new ArrayList<>();
 
   public SimpleQueryBuilder() {
     this(LogicalOperator.AND);
@@ -46,6 +48,20 @@ public class SimpleQueryBuilder {
     return this;
   }
 
+  //TODO (Satya) make the measureTypes an enum
+  public SimpleQueryBuilder withAggregate(String measureType, Column measureColumn) {
+    String columnName = measureType + "(" + measureColumn.getName() + ") AS " + measureType + "_" + measureColumn
+        .getName();
+    tableColumnList.add(columnName);
+    return this;
+  }
+
+  public SimpleQueryBuilder withGroupBy(Column dimension) {
+    tableColumnList.add(dimension.getName());
+    groupByColumnList.add(dimension);
+    return this;
+  }
+
   private String getWhereClause() {
     QueryClause clause = null;
     if (clauseList.size() == 1) {
@@ -60,7 +76,7 @@ public class SimpleQueryBuilder {
   }
 
   private String[] getArguments() {
-    QueryClause  clause = new CompoundQueryClause(operator, clauseList);
+    QueryClause clause = new CompoundQueryClause(operator, clauseList);
     List<String> argumentList = clause.getSelectionArguments();
     if (argumentList == null || argumentList.isEmpty()) {
       return null;
@@ -68,7 +84,25 @@ public class SimpleQueryBuilder {
     return argumentList.toArray(new String[argumentList.size()]);
   }
 
+  private String getGroupByClause() {
+    StringBuilder builder = new StringBuilder("");
+    int ctr = 0;
+    for (Column column : groupByColumnList) {
+      if (ctr > 0) {
+        builder.append(",");
+      }
+      builder.append(column.getName());
+      ctr++;
+    }
+    return builder.toString();
+  }
+
+  private String[] getSelectColumns() {
+    return tableColumnList.toArray(new String[tableColumnList.size()]);
+  }
+
   public Query build() {
-    return new Query(getWhereClause(), getArguments(), null);
+    return new Query(getSelectColumns(), getWhereClause(), getArguments(),
+        null, getGroupByClause());
   }
 }

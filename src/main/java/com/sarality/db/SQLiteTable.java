@@ -149,21 +149,33 @@ public class SQLiteTable<T> implements Table<T> {
    */
   @Override
   public List<T> readAll(Query query) {
+    return readAll(query, extractor);
+  }
+
+  /**
+   * retrieve a set of rows given a Query and a CDE.
+   *
+   * @param query     Query to run on the table
+   * @param extractor CursorDataExtractor for custom mapping columns for eg aggregate queries
+   * @return List of data objects
+   */
+  public <K> List<K> readAll(Query query, CursorDataExtractor<K> extractor) {
     assertDatabaseOpen();
     Cursor cursor = null;
-    List<T> dataList = new ArrayList<T>();
+    List<K> dataList = new ArrayList<K>();
 
     try {
       if (query == null) {
         cursor = database.query(getTableName(), new String[] {}, null, null, null, null, null);
       } else {
-        cursor = database.query(getTableName(), null, query.getWhereClause(), query.getWhereClauseArguments(),
-            null, null, query.getOrderByClause());
+        cursor = database.query(getTableName(), query.getSelectColumns(), query.getWhereClause(),
+            query.getWhereClauseArguments(), query.getGroupByClause(), null,
+            query.getOrderByClause());
       }
 
       cursor.moveToFirst();
       while (!cursor.isAfterLast()) {
-        T data = extractor.extract(cursor, query);
+        K data = extractor.extract(cursor, query);
         dataList.add(data);
         cursor.moveToNext();
       }
@@ -174,9 +186,10 @@ public class SQLiteTable<T> implements Table<T> {
         cursor.close();
       }
     }
+
+
     return dataList;
   }
-
 
   /**
    * Retrieve the set of rows from the table for the given query.
@@ -212,7 +225,7 @@ public class SQLiteTable<T> implements Table<T> {
   /**
    * Update all rows that match the query with the data provided in the given data object.
    *
-   * @param data Data with the values that need to be updated.
+   * @param data  Data with the values that need to be updated.
    * @param query Query for the rows that need to be updated.
    */
   @Override

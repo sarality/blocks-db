@@ -15,10 +15,21 @@ public class Query {
   // Order by clause for the query
   private final String orderByClause;
 
+  //Group By Clause
+  private final String groupByClause;
+  private final String[] selectColumns;
+
   public Query(String whereClause, String[] whereClauseArguments, String orderByClause) {
+    this(new String[] {}, whereClause, whereClauseArguments, orderByClause, null);
+  }
+
+  public Query(String[] selectColumns, String whereClause, String[] whereClauseArguments, String orderByClause,
+      String groupByClause) {
     this.whereClause = whereClause;
     this.whereClauseArguments = whereClauseArguments;
     this.orderByClause = orderByClause;
+    this.selectColumns = selectColumns;
+    this.groupByClause = groupByClause;
   }
 
   public final String getWhereClause() {
@@ -31,5 +42,13 @@ public class Query {
 
   public final String getOrderByClause() {
     return orderByClause;
+  }
+
+  public String getGroupByClause() {
+    return groupByClause;
+  }
+
+  public String[] getSelectColumns() {
+    return selectColumns;
   }
 }

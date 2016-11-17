@@ -16,6 +16,8 @@ public class SimpleQueryBuilder {
 
   private final LogicalOperator operator;
   private final List<QueryClause> clauseList = new ArrayList<>();
+  private final List<AggregateMeasure> measuresList = new ArrayList<>();
+  private final List<Column> groupByColumnList = new ArrayList<>();
 
   public SimpleQueryBuilder() {
     this(LogicalOperator.AND);
@@ -46,6 +48,16 @@ public class SimpleQueryBuilder {
     return this;
   }
 
+  public SimpleQueryBuilder aggregateOn(AggregateFunction measureType, Column measureColumn) {
+    measuresList.add(new AggregateMeasure(measureType, measureColumn));
+    return this;
+  }
+
+  public SimpleQueryBuilder groupBy(Column dimension) {
+    groupByColumnList.add(dimension);
+    return this;
+  }
+
   private String getWhereClause() {
     QueryClause clause = null;
     if (clauseList.size() == 1) {
@@ -60,7 +72,7 @@ public class SimpleQueryBuilder {
   }
 
   private String[] getArguments() {
-    QueryClause  clause = new CompoundQueryClause(operator, clauseList);
+    QueryClause clause = new CompoundQueryClause(operator, clauseList);
     List<String> argumentList = clause.getSelectionArguments();
     if (argumentList == null || argumentList.isEmpty()) {
       return null;
@@ -68,7 +80,36 @@ public class SimpleQueryBuilder {
     return argumentList.toArray(new String[argumentList.size()]);
   }
 
+  private String getGroupByClause() {
+    StringBuilder builder = new StringBuilder();
+    int ctr = 0;
+    for (Column column : groupByColumnList) {
+      if (ctr > 0) {
+        builder.append(",");
+      }
+      builder.append(column.getName());
+      ctr++;
+    }
+
+    return builder.toString();
+  }
+
+  private String[] getSelectColumns() {
+    List<String> tableColumnList = new ArrayList<>();
+    for (Column column: groupByColumnList) {
+      tableColumnList.add(column.getName());
+    }
+
+    for (AggregateMeasure measure: measuresList) {
+      String columnName = measure.getFunction() + "(" + measure.getColumn().getName() + ") AS " + measure.getFunction
+          () + "_" + measure.getColumn().getName();
+      tableColumnList.add(columnName);
+    }
+    return tableColumnList.toArray(new String[tableColumnList.size()]);
+  }
+
   public Query build() {
-    return new Query(getWhereClause(), getArguments(), null);
+    return new Query(getSelectColumns(), getWhereClause(), getArguments(),
+        null, getGroupByClause());
   }
 }

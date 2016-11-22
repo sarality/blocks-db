@@ -55,10 +55,10 @@ public class MappedEnumColumn<V, T extends Enum<T>> extends BaseColumn implement
     checkForRequiredColumn(column, mappedValue);
     checkForColumnDataType(column, mapper.getEnumClass(), DataType.ENUM);
 
-    String dbValue = null;
     if (mappedValue != null) {
-      dbValue = mappedValue.name();
+      contentValues.put(column.getName(), mappedValue.name());
+    } else {
+      contentValues.putNull(column.getName());
     }
-    contentValues.put(column.getName(), dbValue);
   }
 }

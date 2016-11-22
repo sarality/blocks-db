@@ -16,7 +16,7 @@ import hirondelle.date4j.DateTime;
 public class DateTimeColumn extends BaseColumn implements ColumnValueReader<DateTime>, ColumnValueWriter<DateTime>,
     ColumnValueFormatter<DateTime> {
 
-  private static final String ISO_8601_DATE_TIME = "YYYY-MM-DD HH:MM:SS";
+  private static final String ISO_8601_DATE_TIME = "YYYY-MM-DD hh:mm:ss";
 
   public DateTimeColumn(String prefix) {
     super(prefix);
@@ -60,7 +60,7 @@ public class DateTimeColumn extends BaseColumn implements ColumnValueReader<Date
   public void setValue(ContentValues contentValues, Column column, DateTime value) {
     checkForRequiredColumn(column, value);
     if (value == null) {
-      contentValues.put(column.getName(), (String) null);
+      contentValues.putNull(column.getName());
       return;
     }
 

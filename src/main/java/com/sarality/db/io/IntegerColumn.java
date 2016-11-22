@@ -36,6 +36,10 @@ public class IntegerColumn extends BaseColumn implements ColumnValueReader<Integ
     checkForRequiredColumn(column, value);
     checkForColumnDataType(column, Integer.class, DataType.INTEGER);
 
-    contentValues.put(column.getName(), value);
+    if (value != null) {
+      contentValues.put(column.getName(), value);
+    } else {
+      contentValues.putNull(column.getName());
+    }
   }
 }

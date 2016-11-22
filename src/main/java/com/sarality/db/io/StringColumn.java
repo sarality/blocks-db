@@ -31,6 +31,10 @@ public class StringColumn extends BaseColumn implements ColumnValueReader<String
     checkForRequiredColumn(column, value);
     checkForColumnDataType(column, String.class, DataType.TEXT);
 
-    contentValues.put(column.getName(), value);
+    if (value != null) {
+      contentValues.put(column.getName(), value);
+    } else {
+      contentValues.putNull(column.getName());
+    }
   }
 }

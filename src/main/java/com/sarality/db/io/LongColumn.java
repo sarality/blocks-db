@@ -41,6 +41,10 @@ public class LongColumn extends BaseColumn implements ColumnValueReader<Long>, C
     checkForRequiredColumn(column, value);
     checkForColumnDataType(column, Long.class, DataType.INTEGER);
 
-    contentValues.put(column.getName(), value);
+    if (value != null) {
+      contentValues.put(column.getName(), value);
+    } else {
+      contentValues.putNull(column.getName());
+    }
   }
 }

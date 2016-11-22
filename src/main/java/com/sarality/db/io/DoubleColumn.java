@@ -24,7 +24,11 @@ public class DoubleColumn extends BaseColumn implements ColumnValueReader<Double
       throw new IllegalStateException("Cannot extract Double from Column " + column + " with data type "
           + column.getDataType());
     }
-    return cursor.getDouble(cursor.getColumnIndex(getColumnName(column)));
+    int index = cursor.getColumnIndex(getColumnName(column));
+    if (cursor.isNull(index)) {
+      return null;
+    }
+    return cursor.getDouble(index);
   }
 
   public void setValue(ContentValues contentValues, Column column, Double value) {

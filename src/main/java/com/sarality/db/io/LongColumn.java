@@ -24,7 +24,11 @@ public class LongColumn extends BaseColumn implements ColumnValueReader<Long>, C
       throw new IllegalStateException("Cannot extract Long from Column " + column + " with data type "
           + column.getDataType());
     }
-    return cursor.getLong(cursor.getColumnIndex(getColumnName(column)));
+    int index = cursor.getColumnIndex(getColumnName(column));
+    if (cursor.isNull(index)) {
+      return null;
+    }
+    return cursor.getLong(index);
   }
 
   @Override

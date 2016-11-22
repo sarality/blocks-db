@@ -32,10 +32,11 @@ public class MappedEnumColumn<V, T extends Enum<T>> extends BaseColumn implement
       throw new IllegalArgumentException("Cannot extract Enum value from Column " + column
           + " without a way to map Enum value to String values");
     }
-    String dbValue = cursor.getString(cursor.getColumnIndex(getColumnName(column)));
-    if (dbValue == null) {
+    int index = cursor.getColumnIndex(getColumnName(column));
+    if (cursor.isNull(index)) {
       return null;
     }
+    String dbValue = cursor.getString(index);
     T enumValue;
     try {
       enumValue = mapper.valueOf(dbValue);

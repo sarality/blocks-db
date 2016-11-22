@@ -25,15 +25,19 @@ public class DateTimeColumn extends BaseColumn implements ColumnValueReader<Date
   @Override
   public DateTime getValue(Cursor cursor, Column column) {
     DataType dataType = column.getDataType();
+    int index = cursor.getColumnIndex(getColumnName(column));
+    if (cursor.isNull(index)) {
+      return null;
+    }
     if (dataType.equals(DataType.DATE_AS_INT)) {
-      int date = cursor.getInt(cursor.getColumnIndex(getColumnName(column)));
+      int date = cursor.getInt(index);
       int year = date / 10000;
       int month = (date - year * 10000) / 100;
       int day = date % 100;
 
       return DateTime.forDateOnly(year, month, day);
     } else if (dataType.equals(DataType.DATETIME)) {
-      String date = cursor.getString(cursor.getColumnIndex(getColumnName(column)));
+      String date = cursor.getString(index);
       return new DateTime(date);
     } else {
       throw new IllegalStateException("Cannot extract Date from Column " + column + " with data type " + dataType);

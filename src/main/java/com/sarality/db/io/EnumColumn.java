@@ -43,7 +43,10 @@ public class EnumColumn<T extends Enum<T>> extends BaseColumn implements ColumnV
   public void setValue(ContentValues contentValues, Column column, T value) {
     checkForRequiredColumn(column, value);
     checkForColumnDataType(column, enumClass, DataType.ENUM);
-
-    contentValues.put(column.getName(), value.name());
+    String name = null;
+    if (value != null) {
+      name = value.name();
+    }
+    contentValues.put(column.getName(), name);
   }
 }

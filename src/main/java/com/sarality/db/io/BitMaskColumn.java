@@ -52,6 +52,11 @@ public class BitMaskColumn<T extends Enum<T>> extends BaseColumn implements Colu
 
   @Override
   public void setValue(ContentValues contentValues, Column column, Set<T> values) {
+    checkForRequiredColumn(column, values);
+    if (values == null) {
+      contentValues.put(column.getName(), (String) null);
+      return;
+    }
     int dbValue = 0;
     for (T value : values) {
       BitPosition bitPosition = mapper.getValue(value);

@@ -59,6 +59,10 @@ public class DateTimeColumn extends BaseColumn implements ColumnValueReader<Date
   @Override
   public void setValue(ContentValues contentValues, Column column, DateTime value) {
     checkForRequiredColumn(column, value);
+    if (value == null) {
+      contentValues.put(column.getName(), (String) null);
+      return;
+    }
 
     if (column.getDataType().equals(DataType.DATE_AS_INT)) {
       contentValues.put(column.getName(), getDateAsIntValue(value));

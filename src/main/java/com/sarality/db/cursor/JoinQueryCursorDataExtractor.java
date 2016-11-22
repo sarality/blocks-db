@@ -2,7 +2,7 @@ package com.sarality.db.cursor;
 
 import android.database.Cursor;
 
-import com.sarality.db.common.ChildDataSetter;
+import com.sarality.db.common.FieldValueSetter;
 import com.sarality.db.query.Query;
 
 import java.util.ArrayList;
@@ -18,14 +18,14 @@ public class JoinQueryCursorDataExtractor<T> implements CursorDataExtractor<T> {
 
   private final CursorDataExtractor<T> cursorDataExtractor;
   private final List<CursorDataExtractor<?>> extractorList = new ArrayList<>();
-  private final List<ChildDataSetter<T, ?>> childDataSetterList = new ArrayList<>();
+  private final List<FieldValueSetter<T, ?>> childDataSetterList = new ArrayList<>();
 
   public JoinQueryCursorDataExtractor(CursorDataExtractor<T> cursorDataExtractor) {
     this.cursorDataExtractor = cursorDataExtractor;
   }
 
   public <A> JoinQueryCursorDataExtractor<T> withExtractor(CursorDataExtractor<A> extractor,
-      ChildDataSetter<T, A> setter) {
+      FieldValueSetter<T, A> setter) {
     extractorList.add(extractor);
     childDataSetterList.add(setter);
     return this;
@@ -48,8 +48,8 @@ public class JoinQueryCursorDataExtractor<T> implements CursorDataExtractor<T> {
   @SuppressWarnings("unchecked")
   private <A> void processChild(Cursor cursor, Query query, T value, int ctr) {
     CursorDataExtractor<A> extractor = (CursorDataExtractor<A>) extractorList.get(ctr);
-    ChildDataSetter<T, A> setter = (ChildDataSetter<T, A>) childDataSetterList.get(ctr);
-    setter.setChildData(value, extractor.extract(cursor, query));
+    FieldValueSetter<T, A> setter = (FieldValueSetter<T, A>) childDataSetterList.get(ctr);
+    setter.setValue(value, extractor.extract(cursor, query));
 
   }
 }

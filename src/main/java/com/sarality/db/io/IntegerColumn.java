@@ -24,7 +24,11 @@ public class IntegerColumn extends BaseColumn implements ColumnValueReader<Integ
       throw new IllegalStateException("Cannot extract Integer from Column " + column + " with data type "
           + column.getDataType());
     }
-    return cursor.getInt(cursor.getColumnIndex(getColumnName(column)));
+    int index = cursor.getColumnIndex(getColumnName(column));
+    if (cursor.isNull(index)) {
+      return null;
+    }
+    return cursor.getInt(index);
   }
 
   @Override

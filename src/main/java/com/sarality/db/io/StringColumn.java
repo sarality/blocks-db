@@ -19,7 +19,11 @@ public class StringColumn extends BaseColumn implements ColumnValueReader<String
 
   @Override
   public String getValue(Cursor cursor, Column column) {
-    return cursor.getString(cursor.getColumnIndex(getColumnName(column)));
+    int index = cursor.getColumnIndex(getColumnName(column));
+    if (cursor.isNull(index)) {
+      return null;
+    }
+    return cursor.getString(index);
   }
 
   @Override

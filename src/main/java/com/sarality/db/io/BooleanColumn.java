@@ -32,10 +32,11 @@ public class BooleanColumn<T extends Enum<T>> extends BaseColumn implements Colu
       throw new IllegalArgumentException("Cannot extract boolean value from Column " + column
           + " with a way to may Enum value to Boolean values");
     }
-    String dbValue = cursor.getString(cursor.getColumnIndex(getColumnName(column)));
-    if (dbValue == null) {
+    int index = cursor.getColumnIndex(getColumnName(column));
+    if (cursor.isNull(index)) {
       return null;
     }
+    String dbValue = cursor.getString(index);
     T enumValue;
     try {
       enumValue = mapper.valueOf(dbValue);

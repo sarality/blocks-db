@@ -35,7 +35,11 @@ public class BitMaskColumn<T extends Enum<T>> extends BaseColumn implements Colu
       throw new IllegalArgumentException("Cannot extract Enum Set value from Column " + column
           + " without a way to map Enum value to Integer values");
     }
-    int dbValue = cursor.getInt(cursor.getColumnIndex(getColumnName(column)));
+    int index = cursor.getColumnIndex(getColumnName(column));
+    if (cursor.isNull(index)) {
+      return null;
+    }
+    int dbValue = cursor.getInt(index);
     Set<T> valueSet = new HashSet<>();
     for (BitPosition bitPosition : mapper.getValues()) {
       int value = bitPosition.intValue();

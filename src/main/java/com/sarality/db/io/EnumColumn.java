@@ -27,10 +27,11 @@ public class EnumColumn<T extends Enum<T>> extends BaseColumn implements ColumnV
       throw new IllegalStateException("Cannot extract Enum from Column " + column + " with data type "
           + column.getDataType() + " using this method");
     }
-    String dbValue = cursor.getString(cursor.getColumnIndex(getColumnName(column)));
-    if (dbValue == null) {
+    int index = cursor.getColumnIndex(getColumnName(column));
+    if (cursor.isNull(index)) {
       return null;
     }
+    String dbValue = cursor.getString(index);
     try {
       return Enum.valueOf(enumClass, dbValue);
     } catch (IllegalArgumentException e) {

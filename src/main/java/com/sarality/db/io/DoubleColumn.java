@@ -35,6 +35,10 @@ public class DoubleColumn extends BaseColumn implements ColumnValueReader<Double
     checkForRequiredColumn(column, value);
     checkForColumnDataType(column, Double.class, DataType.DOUBLE);
 
-    contentValues.put(column.getName(), value);
+    if (value != null) {
+      contentValues.put(column.getName(), value);
+    } else {
+      contentValues.putNull(column.getName());
+    }
   }
 }

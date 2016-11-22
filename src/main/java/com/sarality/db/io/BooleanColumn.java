@@ -59,6 +59,10 @@ public class BooleanColumn<T extends Enum<T>> extends BaseColumn implements Colu
     if (mappedValue != null) {
       dbValue = mappedValue.name();
     }
-    contentValues.put(column.getName(), dbValue);
+    if (dbValue == null) {
+      contentValues.putNull(column.getName());
+    } else {
+      contentValues.put(column.getName(), dbValue);
+    }
   }
 }

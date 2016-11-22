@@ -6,12 +6,10 @@ package com.sarality.db.io;
  * @author abhideep@ (Abhideep Singh)
  */
 public class BitPosition {
-  private final int bitPosition;
   private final int intValue;
 
-  public BitPosition(int bitPosition) {
-    this.bitPosition = bitPosition;
-    this.intValue = 2 ^ bitPosition;
+  public BitPosition(int intValue) {
+    this.intValue = intValue;
   }
 
   public int intValue() {
@@ -20,7 +18,7 @@ public class BitPosition {
 
   @Override
   public int hashCode() {
-    return bitPosition;
+    return intValue;
   }
 
   @Override

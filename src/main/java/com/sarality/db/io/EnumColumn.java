@@ -12,7 +12,7 @@ import com.sarality.db.DataType;
  * @author abhideep@ (Abhideep Singh)
  */
 public class EnumColumn<T extends Enum<T>> extends BaseColumn implements ColumnValueReader<T>,
-    ColumnValueWriter<T> {
+    ColumnValueWriter<T>, ColumnValueFormatter<T> {
 
   private final Class<T> enumClass;
 
@@ -36,6 +36,16 @@ public class EnumColumn<T extends Enum<T>> extends BaseColumn implements ColumnV
       return Enum.valueOf(enumClass, dbValue);
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException("No enum found for " + dbValue);
+    }
+  }
+
+  @Override
+  public String getQueryArgValue(Column column, T value) {
+    if (column.getDataType().equals(DataType.ENUM) || column.getDataType().equals(DataType.TEXT)) {
+      return value.name();
+    } else {
+      throw new IllegalArgumentException("Cannot query Column " + column.getName()
+          + " with data type " + column.getDataType() + " using Enum value");
     }
   }
 

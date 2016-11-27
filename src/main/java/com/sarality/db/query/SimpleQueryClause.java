@@ -2,6 +2,7 @@ package com.sarality.db.query;
 
 import com.sarality.db.Column;
 import com.sarality.db.io.DateTimeColumn;
+import com.sarality.db.io.EnumColumn;
 import com.sarality.db.io.LongColumn;
 
 import java.util.ArrayList;
@@ -40,6 +41,9 @@ public class SimpleQueryClause implements QueryClause {
     this(column, operator, new DateTimeColumn(null).getQueryArgValue(column, value));
   }
 
+  public <E extends Enum<E>> SimpleQueryClause(Column column, Operator operator, E value, Class<E> enumClass) {
+    this(column, operator, new EnumColumn<E>(null, enumClass).getQueryArgValue(column, value));
+  }
 
   @Override
   public String getSelection() {

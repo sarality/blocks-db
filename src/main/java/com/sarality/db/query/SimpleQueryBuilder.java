@@ -31,6 +31,14 @@ public class SimpleQueryBuilder {
     return withFilter(column, Operator.EQUALS, value);
   }
 
+  public SimpleQueryBuilder withFilter(Column column, String value) {
+    return withFilter(column, Operator.EQUALS, value);
+  }
+
+  public <E extends Enum<E>> SimpleQueryBuilder withFilter(Column column, E value, Class<E> enumClass) {
+    return withFilter(column, Operator.EQUALS, value, enumClass);
+  }
+
   public SimpleQueryBuilder withFilter(Column column, Operator operator, String value) {
     return withFilter(new SimpleQueryClause(column, operator, value));
   }
@@ -41,6 +49,11 @@ public class SimpleQueryBuilder {
 
   public SimpleQueryBuilder withFilter(Column column, Operator operator, DateTime value) {
     return withFilter(new SimpleQueryClause(column, operator, value));
+  }
+
+  public <E extends Enum<E>> SimpleQueryBuilder withFilter(Column column, Operator operator, E value,
+      Class<E> enumClass) {
+    return withFilter(new SimpleQueryClause(column, operator, value, enumClass));
   }
 
   public SimpleQueryBuilder withFilter(QueryClause clauseBuilder) {

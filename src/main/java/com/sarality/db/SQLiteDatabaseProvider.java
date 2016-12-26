@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author abhideep@ (Abhideep Singh)
  */
-public class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvider<SQLiteDatabase> {
+class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvider<SQLiteDatabase> {
 
   private final Logger logger = LoggerFactory.getLogger(SQLiteDatabaseProvider.class.getSimpleName());
 
@@ -24,7 +24,7 @@ public class SQLiteDatabaseProvider extends SQLiteOpenHelper implements Database
 
   private SQLiteDatabase database;
 
-  public SQLiteDatabaseProvider(Context context, String dbName, int dbVersion) {
+  SQLiteDatabaseProvider(Context context, String dbName, int dbVersion) {
     super(context, dbName, null, dbVersion);
     this.dbName = dbName;
     this.dbVersion = dbVersion;
@@ -63,20 +63,5 @@ public class SQLiteDatabaseProvider extends SQLiteOpenHelper implements Database
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     logger.info("Upgrading tables for database {} to version {}.", dbName, dbVersion);
-    for (TableDefinition definition : definitionList) {
-      logger.info("Dropping tables " + definition.getTableName());
-      db.execSQL(TableSQLGenerator.getDropSql(definition.getTableName()));
-    }
-    onCreate(db);
-  }
-
-  @Override
-  public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    logger.info("Downgrading tables for database {} to version {}.", dbName, dbVersion);
-    for (TableDefinition definition : definitionList) {
-      logger.info("Dropping tables " + definition.getTableName());
-      db.execSQL(TableSQLGenerator.getDropSql(definition.getTableName()));
-    }
-    onCreate(db);
   }
 }

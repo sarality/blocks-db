@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.sarality.db.content.ContentValueWriter;
 import com.sarality.db.content.ContentValuesPopulator;
 import com.sarality.db.cursor.CursorDataExtractor;
 import com.sarality.db.query.Query;
@@ -16,6 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
+
+import hirondelle.date4j.DateTime;
 
 /**
  * Implementation of a table to store and query data from a SQLite database.
@@ -40,11 +44,17 @@ public class SQLiteTable<T> implements Table<T> {
   private SQLiteDatabase database;
   private SQLiteTransactionManager transactionManager;
 
-  public SQLiteTable(Context context, TableDefinition tableDefinition,
-      CursorDataExtractor<T> extractor, ContentValuesPopulator<T> populator) {
+  private final Column creationTimestampColumn;
+  private final Column modificationTimestampColumn;
+
+  public SQLiteTable(TableDefinition tableDefinition,
+      CursorDataExtractor<T> extractor, ContentValuesPopulator<T> populator,
+      Column creationTimestampColumn, Column modificationTimestampColumn) {
     this.tableDefinition = tableDefinition;
     this.extractor = extractor;
     this.populator = populator;
+    this.creationTimestampColumn = creationTimestampColumn;
+    this.modificationTimestampColumn = modificationTimestampColumn;
   }
 
   @Override
@@ -123,6 +133,15 @@ public class SQLiteTable<T> implements Table<T> {
     ContentValues contentValues = new ContentValues();
     if (populator.populate(contentValues, data)) {
       logger.debug("Adding new row to table {} with Content Values {}", getTableName(), contentValues);
+      if (creationTimestampColumn != null && contentValues.get(creationTimestampColumn.getName()) == null) {
+        ContentValueWriter writer = new ContentValueWriter(contentValues);
+        DateTime now = DateTime.now(TimeZone.getDefault());
+        logger.debug("Adding creation timestamp {} to entry in table {} ", now, getTableName());
+        writer.addDate(creationTimestampColumn, now);
+        if (modificationTimestampColumn != null) {
+          writer.addDate(modificationTimestampColumn, now);
+        }
+      }
 
       // TODO(abhideep): Call a method that converts a rowd Id to a Long
       return database.insert(getTableName(), null, contentValues);
@@ -236,6 +255,13 @@ public class SQLiteTable<T> implements Table<T> {
 
     ContentValues contentValues = new ContentValues();
     populator.populate(contentValues, data);
+    if (modificationTimestampColumn != null && contentValues.get(modificationTimestampColumn.getName()) == null) {
+      ContentValueWriter writer = new ContentValueWriter(contentValues);
+      DateTime now = DateTime.now(TimeZone.getDefault());
+      logger.debug("Adding modification timestamp {} to entry in table {} ", now, getTableName());
+      writer.addDate(modificationTimestampColumn, now);
+    }
+
     int num = database.update(getTableName(), contentValues, query.getWhereClause(), query.getWhereClauseArguments());
     logger.debug("Updated {} number of rows in table {}", num, getTableName());
     return num;

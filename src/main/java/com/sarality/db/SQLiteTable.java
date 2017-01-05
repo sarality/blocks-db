@@ -249,12 +249,14 @@ public class SQLiteTable<T> implements Table<T> {
    */
   @Override
   public int update(T data, Query query) {
-    assertDatabaseOpen();
-
-    // TODO(abhideep) Before we update the data, sanitize and validate that the data is valid.
-
     ContentValues contentValues = new ContentValues();
     populator.populate(contentValues, data);
+    return update(contentValues, query);
+  }
+
+  @Override
+  public int update(ContentValues contentValues, Query query) {
+    assertDatabaseOpen();
     if (modificationTimestampColumn != null && contentValues.get(modificationTimestampColumn.getName()) == null) {
       ContentValueWriter writer = new ContentValueWriter(contentValues);
       DateTime now = DateTime.now(TimeZone.getDefault());

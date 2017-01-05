@@ -1,5 +1,6 @@
 package com.sarality.db;
 
+import android.content.ContentValues;
 import android.content.Context;
 
 import com.sarality.db.query.Query;
@@ -30,6 +31,8 @@ public interface Table<T> {
   List<T> readAll(Query query);
 
   int update(T data, Query query);
+
+  int update(ContentValues data, Query query);
 
   int delete(Query query);
 }

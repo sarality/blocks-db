@@ -1,5 +1,6 @@
 package com.sarality.db;
 
+import android.content.ContentValues;
 import android.content.Context;
 
 import com.sarality.db.query.ParsedQuery;
@@ -97,6 +98,11 @@ public abstract class InMemoryTable<T> implements Table<T> {
     // get the item that matches the query request
     dataList.add(dataMap.get(getKey(parsedQuery)));
     return dataList;
+  }
+
+  @Override
+  public int update(ContentValues data, Query query) {
+    throw new UnsupportedOperationException("Updates using ContentValues is not supported");
   }
 
   @Override

@@ -6,7 +6,7 @@ package com.sarality.db;
  * @author Satya@ (Satya Puniani) on 01/03/17
  */
 
-public enum UpdateOperationType {
+public enum SchemaUpdateType {
   CREATE_TABLE,
   ADD_COLUMN,
   DROP_COLUMN,

@@ -1,5 +1,8 @@
 package com.sarality.db;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Defines the Database name, version and columns for Table.
  * <p/>
@@ -15,6 +18,8 @@ public class TableDefinition {
   private final String tableName;
   // The version of the database defined by the given set of columns
   private final int tableVersion;
+  // A list of updates for each version
+  private List<SchemaUpdate> schemaUpdateList = new ArrayList<>();
 
   private final Column[] columns;
 
@@ -40,4 +45,16 @@ public class TableDefinition {
   public Column[] getColumns() {
     return columns;
   }
+
+  public TableDefinition withUpdateForVersion(SchemaUpdate schemaUpdate) {
+    schemaUpdateList.add(schemaUpdate);
+    return this;
+  }
+
+  List<SchemaUpdate> getSchemaUpdates() {
+
+    return schemaUpdateList;
+  }
+
+
 }

@@ -71,24 +71,19 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
     for (TableDefinition definition : definitionList) {
       // get current schema
       List<Column> versionColumns = new ArrayList<>();
-      boolean isSchemaInitialized = false;
+      SchemaUpdateClassifier classifier = new SchemaUpdateClassifier(definition);
+      VersionSchemaProvider schemaProvider = new VersionSchemaProvider(definition, classifier, oldVersion);
 
       for (Integer version = oldVersion + 1; version <= newVersion; version++) {
-        Map<UpdateOperationType, List<UpdateOperation>> operations = definition.getUpdatesForVersion(version);
-        if (operations == null) {
+        if (!classifier.isSchemaUpdatedInVersion(version)) {
           logger.info("No version upgrade operations for table {} in version {}.", definition.getTableName(), version);
           continue;
         }
 
         logger.info("Running upgrade operations for table {} in version {}.", definition.getTableName(), version);
 
-        if (!isSchemaInitialized) {
-          versionColumns = getSchemaForVersion(oldVersion, definition);
-          isSchemaInitialized = true;
-        }
-
         // is this a new table in this version?
-        List<UpdateOperation> updatesList = operations.get(UpdateOperationType.CREATE_TABLE);
+        List<SchemaUpdate> updatesList = classifier.getVersionUpdatesForType(version, SchemaUpdateType.CREATE_TABLE);
 
         if (updatesList != null && updatesList.size() > 0) {
           // Create the table - sql
@@ -103,18 +98,18 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
         }
 
         //are there any new columns added?
-        updatesList = operations.get(UpdateOperationType.ADD_COLUMN);
+        updatesList = classifier.getVersionUpdatesForType(version,SchemaUpdateType.ADD_COLUMN);
         if (updatesList != null && updatesList.size() > 0) {
 
-          for (UpdateOperation updateOperation : updatesList) {
-            versionColumns.add(updateOperation.getNewColumn());
+          for (SchemaUpdate schemaUpdate : updatesList) {
+            AddColumnSchemaUpdate addColumn = (AddColumnSchemaUpdate) schemaUpdate;
             logger.info("Add Column SQL: {} ",
                 TableSQLGenerator.getAddColumnSql(definition.getTableName(),
-                    updateOperation.getNewColumn()));
+                    addColumn.getNewColumn()));
 
             db.execSQL(
                 TableSQLGenerator.getAddColumnSql(definition.getTableName(),
-                    updateOperation.getNewColumn()));
+                    addColumn.getNewColumn()));
 
           }
         }
@@ -123,42 +118,5 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
   }
 
 
-  private List<Column> getSchemaForVersion(int oldVersion, TableDefinition definition) {
-    // get current list of columns
-    Map<String, Column> columnMap = new HashMap<>();
-    for (Column column : definition.getColumns()) {
-      columnMap.put(column.getName(), column);
-    }
-
-    for (Integer version = definition.getTableVersion(); version > oldVersion; version--) {
-      Map<UpdateOperationType, List<UpdateOperation>> operations = definition.getUpdatesForVersion(version);
-      if (operations == null || operations.size() == 0) {
-        logger.info("No version upgrade operations for table {} in version {}.", definition.getTableName(), version);
-        continue;
-      }
-
-      logger.info("Rolling back operations for table {} in version {}.", definition.getTableName(), version);
-
-      // is this a new table in this version?
-      List<UpdateOperation> updatesList = operations.get(UpdateOperationType.CREATE_TABLE);
-
-      if (updatesList != null && updatesList.size() > 0) {
-        //this is a new table, so downgrading would mean removing the table altogether
-        columnMap.clear();
-      }
-
-      // are there any new columns added?
-      updatesList = operations.get(UpdateOperationType.ADD_COLUMN);
-      if (updatesList != null && updatesList.size() > 0) {
-        for (UpdateOperation updateOperation : updatesList) {
-          columnMap.remove(updateOperation.getNewColumn().getName());
-
-        }
-      }
-
-    }
-    return new ArrayList<>(columnMap.values());
-
-  }
 
 }

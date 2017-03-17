@@ -7,7 +7,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 /**
  * Provides mechanism to open and close database table and run queries on them.
@@ -63,5 +67,56 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     logger.info("Upgrading tables for database {} to version {}.", dbName, dbVersion);
+
+    for (TableDefinition definition : definitionList) {
+      // get current schema
+      List<Column> versionColumns = new ArrayList<>();
+      SchemaUpdateClassifier classifier = new SchemaUpdateClassifier(definition);
+      VersionSchemaProvider schemaProvider = new VersionSchemaProvider(definition, classifier, oldVersion);
+
+      for (Integer version = oldVersion + 1; version <= newVersion; version++) {
+        if (!classifier.isSchemaUpdatedInVersion(version)) {
+          logger.info("No version upgrade operations for table {} in version {}.", definition.getTableName(), version);
+          continue;
+        }
+
+        logger.info("Running upgrade operations for table {} in version {}.", definition.getTableName(), version);
+
+        // is this a new table in this version?
+        List<SchemaUpdate> updatesList = classifier.getVersionUpdatesForType(version, SchemaUpdateType.CREATE_TABLE);
+
+        if (updatesList != null && updatesList.size() > 0) {
+          // Create the table - sql
+          logger.info("Create Table SQL: {} ", TableSQLGenerator.getCreateSql(definition.getTableName(),
+              definition.getColumns()));
+
+          db.execSQL(TableSQLGenerator.getCreateSql(definition.getTableName(),
+              definition.getColumns()));
+
+          // I can safely ignore all subsequent updates now
+          break;
+        }
+
+        //are there any new columns added?
+        updatesList = classifier.getVersionUpdatesForType(version,SchemaUpdateType.ADD_COLUMN);
+        if (updatesList != null && updatesList.size() > 0) {
+
+          for (SchemaUpdate schemaUpdate : updatesList) {
+            AddColumnSchemaUpdate addColumn = (AddColumnSchemaUpdate) schemaUpdate;
+            logger.info("Add Column SQL: {} ",
+                TableSQLGenerator.getAddColumnSql(definition.getTableName(),
+                    addColumn.getNewColumn()));
+
+            db.execSQL(
+                TableSQLGenerator.getAddColumnSql(definition.getTableName(),
+                    addColumn.getNewColumn()));
+
+          }
+        }
+      }
+    }
   }
+
+
+
 }

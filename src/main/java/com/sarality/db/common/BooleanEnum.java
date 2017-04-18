@@ -14,4 +14,11 @@ public enum BooleanEnum {
         .withMapping(Boolean.TRUE, BooleanEnum.TRUE)
         .withMapping(Boolean.FALSE, BooleanEnum.FALSE);
   }
+
+  public static EnumMapper<Boolean, BooleanEnum> getEnumMapper() {
+    return new EnumMapper<Boolean, BooleanEnum>(BooleanEnum.class)
+        .withMapping(Boolean.TRUE, BooleanEnum.TRUE)
+        .withMapping(Boolean.FALSE, BooleanEnum.FALSE);
+  }
+
 }

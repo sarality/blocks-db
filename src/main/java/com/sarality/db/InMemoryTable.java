@@ -75,6 +75,11 @@ public abstract class InMemoryTable<T> implements Table<T> {
   }
 
   @Override
+  public Long create(ContentValues data, RecordModifier... additionalModifiers) {
+    throw new UnsupportedOperationException("Create using ContentValues is not supported");
+  }
+
+  @Override
   public List<T> readAll(Query query) {
 
     List<T> dataList = new ArrayList<>();
@@ -101,7 +106,7 @@ public abstract class InMemoryTable<T> implements Table<T> {
   }
 
   @Override
-  public int update(ContentValues data, Query query) {
+  public int update(ContentValues data, Query query, RecordModifier... additionalModifiers) {
     throw new UnsupportedOperationException("Updates using ContentValues is not supported");
   }
 

@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.sarality.db.content.ContentValueWriter;
 import com.sarality.db.content.ContentValuesPopulator;
 import com.sarality.db.cursor.CursorDataExtractor;
 import com.sarality.db.query.Query;
@@ -16,10 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
-
-import hirondelle.date4j.DateTime;
 
 /**
  * Implementation of a table to store and query data from a SQLite database.
@@ -36,6 +33,8 @@ public class SQLiteTable<T> implements Table<T> {
   private final CursorDataExtractor<T> extractor;
   // Class to populate a Content Values from a data object.
   private final ContentValuesPopulator<T> populator;
+  // List of classes that modify the contents of a Row
+  private final List<RecordModifier> recordModifierList = new ArrayList<>();
 
   // Utility class used to access the underlying database as well as manage the schema of the table.
   private SQLiteDatabaseProvider dbProvider;
@@ -44,17 +43,18 @@ public class SQLiteTable<T> implements Table<T> {
   private SQLiteDatabase database;
   private SQLiteTransactionManager transactionManager;
 
-  private final Column creationTimestampColumn;
-  private final Column modificationTimestampColumn;
 
   public SQLiteTable(TableDefinition tableDefinition,
-      CursorDataExtractor<T> extractor, ContentValuesPopulator<T> populator,
-      Column creationTimestampColumn, Column modificationTimestampColumn) {
+      CursorDataExtractor<T> extractor,
+      ContentValuesPopulator<T> populator,
+      RecordModifier... recordModifiers) {
     this.tableDefinition = tableDefinition;
     this.extractor = extractor;
     this.populator = populator;
-    this.creationTimestampColumn = creationTimestampColumn;
-    this.modificationTimestampColumn = modificationTimestampColumn;
+    if (recordModifiers != null) {
+      List<RecordModifier> modifierList = Arrays.asList(recordModifiers);
+      this.recordModifierList.addAll(modifierList);
+    }
   }
 
   @Override
@@ -126,27 +126,27 @@ public class SQLiteTable<T> implements Table<T> {
    */
   @Override
   public Long create(T data) {
-    assertDatabaseOpen();
-
-    // TODO(abhideep): Before we create the data, sanitize and validate that the data is valid.
-
     ContentValues contentValues = new ContentValues();
     if (populator.populate(contentValues, data)) {
-      logger.debug("Adding new row to table {} with Content Values {}", getTableName(), contentValues);
-      if (creationTimestampColumn != null && contentValues.get(creationTimestampColumn.getName()) == null) {
-        ContentValueWriter writer = new ContentValueWriter(contentValues);
-        DateTime now = DateTime.now(TimeZone.getDefault());
-        logger.debug("Adding creation timestamp {} to entry in table {} ", now, getTableName());
-        writer.addDate(creationTimestampColumn, now);
-        if (modificationTimestampColumn != null) {
-          writer.addDate(modificationTimestampColumn, now);
-        }
-      }
-
-      // TODO(abhideep): Call a method that converts a rowd Id to a Long
-      return database.insert(getTableName(), null, contentValues);
+      return create(contentValues);
     }
-    return (long) -1;
+    return -1L;
+  }
+
+  /**
+   * Create a row in the database table.
+   *
+   * @param data The data for the row that needs to be created.
+   * @return The data for the row that was created with the appropriate id also populated.
+   */
+  @Override
+  public Long create(ContentValues data, RecordModifier... additionalModifiers) {
+    assertDatabaseOpen();
+
+    prepareForCreate(data, additionalModifiers);
+
+    logger.debug("Adding new row to table {} with Content Values {}", getTableName(), data);
+    return database.insert(getTableName(), null, data);
   }
 
   /**
@@ -255,21 +255,39 @@ public class SQLiteTable<T> implements Table<T> {
   }
 
   @Override
-  public int update(ContentValues contentValues, Query query) {
+  public int update(ContentValues contentValues, Query query, RecordModifier... additionalModifiers) {
     assertDatabaseOpen();
-    if (modificationTimestampColumn != null && contentValues.get(modificationTimestampColumn.getName()) == null) {
-      ContentValueWriter writer = new ContentValueWriter(contentValues);
-      DateTime now = DateTime.now(TimeZone.getDefault());
-      logger.debug("Adding modification timestamp {} to entry in table {} ", now, getTableName());
-      writer.addDate(modificationTimestampColumn, now);
-    }
+
+    prepareForUpdate(contentValues, additionalModifiers);
 
     int num = database.update(getTableName(), contentValues, query.getWhereClause(), query.getWhereClauseArguments());
     logger.debug("Updated {} number of rows in table {}", num, getTableName());
     return num;
   }
 
-  private String getTableName() {
+  String getTableName() {
     return tableDefinition.getTableName();
+  }
+
+  private void prepareForCreate(ContentValues contentValues, RecordModifier... additionalModifiers) {
+    for (RecordModifier recordModifier : recordModifierList) {
+      recordModifier.onCreate(contentValues);
+    }
+    if (additionalModifiers != null) {
+      for (RecordModifier recordModifier : additionalModifiers) {
+        recordModifier.onCreate(contentValues);
+      }
+    }
+  }
+
+  private void prepareForUpdate(ContentValues contentValues, RecordModifier... additionalModifiers) {
+    for (RecordModifier recordModifier : recordModifierList) {
+      recordModifier.onUpdate(contentValues);
+    }
+    if (additionalModifiers != null) {
+      for (RecordModifier recordModifier : additionalModifiers) {
+        recordModifier.onUpdate(contentValues);
+      }
+    }
   }
 }

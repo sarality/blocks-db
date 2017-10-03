@@ -80,7 +80,7 @@ public interface Table<T> {
    *
    * @param data Data with the new values for the record
    * @param query Query to match the rows that need to be updated
-   * @param additionalModifiers Addition Modifiers to be appilied to the data before it is updated
+   * @param additionalModifiers Addition Modifiers to be applied to the data before it is updated
    * @return Number of rows that were updated.
    */
   int update(ContentValues data, Query query, RecordModifier... additionalModifiers);
@@ -92,4 +92,13 @@ public interface Table<T> {
    * @return Number of Rows that were deleted.
    */
   int delete(Query query);
+
+  /**
+   * Mark all rows that match the given query as Deleted.
+   *
+   * @param data Data with the new values for the records that need to be marked as deleted.
+   * @param query Query to match the rows that need to be marked as deleted.
+   * @return Number of rows that were marked as deleted.
+   */
+  int markAsDeleted(T data, Query query);
 }

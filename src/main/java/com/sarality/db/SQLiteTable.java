@@ -33,6 +33,9 @@ public class SQLiteTable<T> implements Table<T> {
   private final CursorDataExtractor<T> extractor;
   // Class to populate a Content Values from a data object.
   private final ContentValuesPopulator<T> populator;
+  // Class to populate a Content Values from a data object when the record needs to be marked as deleted.
+  private final ContentValuesPopulator<T> deletionRecordPopulator;
+
   // List of classes that modify the contents of a Row
   private final List<RecordModifier> recordModifierList = new ArrayList<>();
 
@@ -47,14 +50,23 @@ public class SQLiteTable<T> implements Table<T> {
   public SQLiteTable(TableDefinition tableDefinition,
       CursorDataExtractor<T> extractor,
       ContentValuesPopulator<T> populator,
+      ContentValuesPopulator<T> deletionRecordPopulator,
       RecordModifier... recordModifiers) {
     this.tableDefinition = tableDefinition;
     this.extractor = extractor;
     this.populator = populator;
+    this.deletionRecordPopulator = deletionRecordPopulator;
     if (recordModifiers != null) {
       List<RecordModifier> modifierList = Arrays.asList(recordModifiers);
       this.recordModifierList.addAll(modifierList);
     }
+  }
+
+  public SQLiteTable(TableDefinition tableDefinition,
+      CursorDataExtractor<T> extractor,
+      ContentValuesPopulator<T> populator,
+      RecordModifier... recordModifiers) {
+    this(tableDefinition, extractor, populator, populator, recordModifiers);
   }
 
   @Override
@@ -268,7 +280,7 @@ public class SQLiteTable<T> implements Table<T> {
   @Override
   public int markAsDeleted(T data, Query query) {
     ContentValues contentValues = new ContentValues();
-    populator.populate(contentValues, data);
+    deletionRecordPopulator.populate(contentValues, data);
     return update(contentValues, query);
   }
 

@@ -142,6 +142,12 @@ public abstract class InMemoryTable<T> implements Table<T> {
     return 0;
   }
 
+  @Override
+  public int markAsDeleted(T data, Query query) {
+    // Not implemented
+    return 0;
+  }
+
   private boolean isPrimaryKeyQuery(ParsedQuery parsedQuery) {
     // Check the format of the whereClause
     boolean isSupported = false;

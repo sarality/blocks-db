@@ -33,6 +33,9 @@ public class SQLiteTable<T> implements Table<T> {
   private final CursorDataExtractor<T> extractor;
   // Class to populate a Content Values from a data object.
   private final ContentValuesPopulator<T> populator;
+  // Class to populate a Content Values from a data object when the record needs to be marked as deleted.
+  private final ContentValuesPopulator<T> deletionRecordPopulator;
+
   // List of classes that modify the contents of a Row
   private final List<RecordModifier> recordModifierList = new ArrayList<>();
 
@@ -47,14 +50,23 @@ public class SQLiteTable<T> implements Table<T> {
   public SQLiteTable(TableDefinition tableDefinition,
       CursorDataExtractor<T> extractor,
       ContentValuesPopulator<T> populator,
+      ContentValuesPopulator<T> deletionRecordPopulator,
       RecordModifier... recordModifiers) {
     this.tableDefinition = tableDefinition;
     this.extractor = extractor;
     this.populator = populator;
+    this.deletionRecordPopulator = deletionRecordPopulator;
     if (recordModifiers != null) {
       List<RecordModifier> modifierList = Arrays.asList(recordModifiers);
       this.recordModifierList.addAll(modifierList);
     }
+  }
+
+  public SQLiteTable(TableDefinition tableDefinition,
+      CursorDataExtractor<T> extractor,
+      ContentValuesPopulator<T> populator,
+      RecordModifier... recordModifiers) {
+    this(tableDefinition, extractor, populator, populator, recordModifiers);
   }
 
   @Override
@@ -91,7 +103,7 @@ public class SQLiteTable<T> implements Table<T> {
     this.database = null;
   }
 
-  protected void assertDatabaseOpen() {
+  private void assertDatabaseOpen() {
     if (database == null || !database.isOpen()) {
       throw new IllegalStateException(
           "Cannot perform operation since the database was either not opened or has already been closed.");
@@ -181,7 +193,7 @@ public class SQLiteTable<T> implements Table<T> {
   public <K> List<K> readAll(Query query, CursorDataExtractor<K> extractor) {
     assertDatabaseOpen();
     Cursor cursor = null;
-    List<K> dataList = new ArrayList<K>();
+    List<K> dataList = new ArrayList<>();
 
     try {
       if (query == null) {
@@ -219,7 +231,7 @@ public class SQLiteTable<T> implements Table<T> {
   public List<T> readAll(RawQuery query, CursorDataExtractor<T> extractor) {
     assertDatabaseOpen();
     Cursor cursor = null;
-    List<T> dataList = new ArrayList<T>();
+    List<T> dataList = new ArrayList<>();
 
     try {
       cursor = database.rawQuery(query.getQuery(), query.getQueryArguments());
@@ -264,6 +276,14 @@ public class SQLiteTable<T> implements Table<T> {
     logger.debug("Updated {} number of rows in table {}", num, getTableName());
     return num;
   }
+
+  @Override
+  public int markAsDeleted(T data, Query query) {
+    ContentValues contentValues = new ContentValues();
+    deletionRecordPopulator.populate(contentValues, data);
+    return update(contentValues, query);
+  }
+
 
   String getTableName() {
     return tableDefinition.getTableName();

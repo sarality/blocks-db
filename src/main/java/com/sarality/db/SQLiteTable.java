@@ -197,11 +197,12 @@ public class SQLiteTable<T> implements Table<T> {
 
     try {
       if (query == null) {
-        cursor = database.query(getTableName(), new String[] {}, null, null, null, null, null);
+        cursor = database.query(getTableName(), new String[] {}, null, null, null,
+            null, null);
       } else {
         cursor = database.query(getTableName(), query.getSelectColumns(), query.getWhereClause(),
-            query.getWhereClauseArguments(), query.getGroupByClause(), null,
-            query.getOrderByClause());
+            query.getWhereClauseArguments(), query.getGroupByClause(), query.getHavingClause(),
+            query.getOrderByClause(), query.getLimit());
       }
 
       cursor.moveToFirst();

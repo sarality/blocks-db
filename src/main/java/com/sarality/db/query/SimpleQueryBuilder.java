@@ -19,7 +19,7 @@ public class SimpleQueryBuilder {
   private final List<AggregateMeasure> measuresList = new ArrayList<>();
   private final List<Column> groupByColumnList = new ArrayList<>();
   private Long limitSize;
-  private Long limitStartOffset;
+  private Long limitOffset;
 
   public SimpleQueryBuilder() {
     this(LogicalOperator.AND);
@@ -77,9 +77,9 @@ public class SimpleQueryBuilder {
     return limit(size, null);
   }
 
-  public SimpleQueryBuilder limit(Long size, Long startOffset) {
+  public SimpleQueryBuilder limit(Long size, Long offset) {
     this.limitSize = size;
-    this.limitStartOffset = limitStartOffset;
+    this.limitOffset = offset;
     return this;
   }
 
@@ -135,6 +135,6 @@ public class SimpleQueryBuilder {
 
   public Query build() {
     return new Query(getSelectColumns(), getWhereClause(), getArguments(),
-        null, getGroupByClause(), null, limitSize, limitStartOffset);
+        null, getGroupByClause(), null, limitSize, limitOffset);
   }
 }

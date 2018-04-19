@@ -20,27 +20,30 @@ public class Query {
   private final String[] selectColumns;
 
   private final String havingClause;
-  private final Long Limit;
+  private final Long limitSize;
+  private final Long limitOffset;
 
   public Query(String whereClause, String[] whereClauseArguments, String orderByClause) {
-    this(new String[] {}, whereClause, whereClauseArguments, orderByClause, null, null, -1L);
+    this(new String[] {}, whereClause, whereClauseArguments, orderByClause, null, null,
+        null, null);
   }
 
   public Query(String[] selectColumns, String whereClause, String[] whereClauseArguments, String orderByClause,
       String groupByClause) {
-    this(selectColumns, whereClause, whereClauseArguments, orderByClause, groupByClause, null, -1L);
+    this(selectColumns, whereClause, whereClauseArguments, orderByClause, groupByClause, null,
+        null, null);
   }
 
-
   public Query(String[] selectColumns, String whereClause, String[] whereClauseArguments, String orderByClause,
-      String groupByClause, String havingClause, Long Limit) {
+      String groupByClause, String havingClause, Long limitSize, Long limitOffset) {
     this.whereClause = whereClause;
     this.whereClauseArguments = whereClauseArguments;
     this.orderByClause = orderByClause;
     this.selectColumns = selectColumns;
     this.groupByClause = groupByClause;
     this.havingClause = havingClause;
-    this.Limit = Limit;
+    this.limitSize = limitSize;
+    this.limitOffset = limitOffset;
   }
 
   public final String getWhereClause() {
@@ -67,7 +70,13 @@ public class Query {
     return havingClause;
   }
 
-  public Long getLimit() {
-    return Limit;
+  public String getLimit() {
+    if (limitSize == null) {
+      return null;
+    } else if (limitOffset == null) {
+      return String.valueOf(limitSize);
+    } else {
+      return String.valueOf(limitOffset) + ", "  + String.valueOf(limitSize);
+    }
   }
 }

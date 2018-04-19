@@ -21,7 +21,7 @@ public class Query {
 
   private final String havingClause;
   private final Long limitSize;
-  private final Long limitStartFrom;
+  private final Long limitStartOffset;
 
   public Query(String whereClause, String[] whereClauseArguments, String orderByClause) {
     this(new String[] {}, whereClause, whereClauseArguments, orderByClause, null, null,
@@ -35,7 +35,7 @@ public class Query {
   }
 
   public Query(String[] selectColumns, String whereClause, String[] whereClauseArguments, String orderByClause,
-      String groupByClause, String havingClause, Long limitSize, Long limitStartFrom) {
+      String groupByClause, String havingClause, Long limitSize, Long limitStartOffset) {
     this.whereClause = whereClause;
     this.whereClauseArguments = whereClauseArguments;
     this.orderByClause = orderByClause;
@@ -43,7 +43,7 @@ public class Query {
     this.groupByClause = groupByClause;
     this.havingClause = havingClause;
     this.limitSize = limitSize;
-    this.limitStartFrom = limitStartFrom;
+    this.limitStartOffset = limitStartOffset;
   }
 
   public final String getWhereClause() {
@@ -73,10 +73,10 @@ public class Query {
   public String getLimit() {
     if (limitSize == null) {
       return null;
-    } else if (limitStartFrom == null) {
+    } else if (limitStartOffset == null) {
       return String.valueOf(limitSize);
     } else {
-      return String.valueOf(limitStartFrom) + ", "  + String.valueOf(limitSize);
+      return String.valueOf(limitStartOffset) + ", "  + String.valueOf(limitSize);
     }
   }
 }

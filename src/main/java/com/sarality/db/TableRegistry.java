@@ -11,6 +11,13 @@ import java.util.Map;
  * @author abhideep@ (Abhideep Singh)
  */
 public class TableRegistry {
+
+  private static final TableRegistry INSTANCE = new TableRegistry();
+
+  public static TableRegistry getInstance() {
+    return INSTANCE;
+  }
+
   private final Map<String, Table<?>> tableMap = new HashMap<>();
   private final Map<String, List<TableDefinition>> dbTableDefinitionsMap = new HashMap<>();
 

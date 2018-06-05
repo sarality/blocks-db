@@ -13,6 +13,11 @@ public class InMemoryTransactionManager implements TransactionManager {
   }
 
   @Override
+  public void beginTransactionImmediate() {
+    // No-Op
+  }
+
+  @Override
   public void setTransactionSuccessful() {
     // No-Op
   }

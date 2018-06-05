@@ -9,6 +9,8 @@ public interface TransactionManager {
 
   void beginTransaction();
 
+  void beginTransactionImmediate();
+
   void setTransactionSuccessful();
 
   void endTransaction();

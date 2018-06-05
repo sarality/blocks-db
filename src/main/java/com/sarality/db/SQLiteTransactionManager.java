@@ -10,13 +10,18 @@ import android.database.sqlite.SQLiteDatabase;
 public class SQLiteTransactionManager implements TransactionManager {
   private final SQLiteDatabase database;
 
-  public SQLiteTransactionManager(SQLiteDatabase database) {
+  SQLiteTransactionManager(SQLiteDatabase database) {
     this.database = database;
   }
 
   @Override
   public void beginTransaction() {
     database.beginTransaction();
+  }
+
+  @Override
+  public void beginTransactionImmediate() {
+    database.beginTransactionNonExclusive();
   }
 
   @Override

@@ -8,9 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -61,6 +59,12 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
     for (TableDefinition definition : definitionList) {
       logger.info("Creating tables " + definition.getTableName());
       database.execSQL(TableSQLGenerator.getCreateSql(definition.getTableName(), definition.getColumns()));
+
+      // Create Indexes for the Table here
+      SchemaUpdateClassifier classifier = new SchemaUpdateClassifier(definition);
+      List<SchemaUpdate> updatesList = classifier.getVersionUpdatesForType(definition.getTableVersion(),
+          SchemaUpdateType.ADD_INDEX);
+      createIndexes(database, definition, updatesList);
     }
   }
 
@@ -82,7 +86,7 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
 
         logger.info("Running upgrade operations for table {} in version {}.", definition.getTableName(), version);
 
-        // is this a new table in this version?
+        // Is this a new table in this version
         List<SchemaUpdate> updatesList = classifier.getVersionUpdatesForType(version, SchemaUpdateType.CREATE_TABLE);
 
         if (updatesList != null && updatesList.size() > 0) {
@@ -97,10 +101,9 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
           break;
         }
 
-        //are there any new columns added?
-        updatesList = classifier.getVersionUpdatesForType(version,SchemaUpdateType.ADD_COLUMN);
+        // Are there any new columns added?
+        updatesList = classifier.getVersionUpdatesForType(version, SchemaUpdateType.ADD_COLUMN);
         if (updatesList != null && updatesList.size() > 0) {
-
           for (SchemaUpdate schemaUpdate : updatesList) {
             AddColumnSchemaUpdate addColumn = (AddColumnSchemaUpdate) schemaUpdate;
             logger.info("Add Column SQL: {} ",
@@ -110,13 +113,26 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
             db.execSQL(
                 TableSQLGenerator.getAddColumnSql(definition.getTableName(),
                     addColumn.getNewColumn()));
-
           }
         }
-      }
+
+        // Are there any new Indexes that need to created
+        updatesList = classifier.getVersionUpdatesForType(version, SchemaUpdateType.ADD_INDEX);
+        createIndexes(db, definition, updatesList);
+      } // For version loop
     }
   }
 
 
-
+  private void createIndexes(SQLiteDatabase db, TableDefinition definition, List<SchemaUpdate> updatesList) {
+    if (updatesList != null && updatesList.size() > 0) {
+      for (SchemaUpdate schemaUpdate : updatesList) {
+        AddIndexSchemaUpdate addIndex = (AddIndexSchemaUpdate) schemaUpdate;
+        String updateSql = TableSQLGenerator.getCreateIndexSql(definition.getTableName(),
+            addIndex.getIndexName(), addIndex.getColumns());
+        logger.info("Add Column SQL: {} ", updateSql);
+        db.execSQL(updateSql);
+      }
+    }
+  }
 }

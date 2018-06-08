@@ -9,6 +9,7 @@ package com.sarality.db;
 public enum SchemaUpdateType {
   CREATE_TABLE,
   ADD_COLUMN,
+  ADD_INDEX,
   DROP_COLUMN,
   CHANGE_DATA_TYPE,
   ADD_REQUIRED_CONSTRAINT,

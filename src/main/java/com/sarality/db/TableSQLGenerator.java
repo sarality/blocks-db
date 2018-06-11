@@ -1,6 +1,5 @@
 package com.sarality.db;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,8 +46,23 @@ public class TableSQLGenerator {
     }
 
     return builder.toString();
+  }
 
+  public static String getCreateIndexSql(String tableName, String indexName, List<Column> columns) {
+    // CREATE INDEX indexName ON tableName (column1, column2)
 
+    StringBuilder builder = new StringBuilder("CREATE INDEX ").append(indexName);
+    builder.append(" ON ").append(tableName).append(" (");
+    int ctr = 0;
+    for (Column column : columns) {
+      if (ctr > 0) {
+        builder.append(", ");
+      }
+      builder.append(column.getName());
+      ctr++;
+    }
+    builder.append(")");
+    return builder.toString();
   }
 
   public static String getDropColumnsSql(TableDefinition oldTableDefinition, Column[] columnsToDrop) {

@@ -130,7 +130,7 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
         AddIndexSchemaUpdate addIndex = (AddIndexSchemaUpdate) schemaUpdate;
         String updateSql = TableSQLGenerator.getCreateIndexSql(definition.getTableName(),
             addIndex.getIndexName(), addIndex.getColumns());
-        logger.info("Add Column SQL: {} ", updateSql);
+        logger.info("Add Index SQL: {} ", updateSql);
         db.execSQL(updateSql);
       }
     }

@@ -7,6 +7,7 @@ package com.sarality.db.query;
  */
 public enum Operator {
   EQUALS("="),
+  EQUALS_IGNORE_CASE("=", "COLLATE NOCASE"),
   NOT_EQUALS("<>"),
   LESS_THAN("<"),
   LESS_THAN_EQUAL_TO("<="),
@@ -15,13 +16,23 @@ public enum Operator {
   IS_NULL("IS NULL"),
   IS_NOT_NULL("IS NOT NULL");
 
-  private String sqlString;
+  private String sql;
+  private String collateFunctionSql;
 
-  Operator(String sqlString) {
-    this.sqlString = sqlString;
+  Operator(String sql) {
+    this(sql, null);
   }
 
-  public String getSqlString() {
-    return sqlString;
+  Operator(String sql, String collateFunctionSql) {
+    this.sql = sql;
+    this.collateFunctionSql = collateFunctionSql;
+  }
+
+  public String getSQL() {
+    return sql;
+  }
+
+  public String getCollateFunctionSQL() {
+    return collateFunctionSql;
   }
 }

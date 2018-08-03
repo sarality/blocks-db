@@ -126,13 +126,17 @@ public class SimpleJoinQueryBuilder {
         builder.append(" ").append(operator.toString()).append(" ");
       }
       builder.append(columnPrefix).append(".").append(column.getName())
-          .append(" ").append(filterOperator.getSqlString());
+          .append(" ").append(filterOperator.getSQL());
       if (joinColumn != null) {
         String joinTableName = joinColumn.getTableName();
         String joinTablePrefix = getTablePrefix(joinTableName);
         builder.append(" ").append(joinTablePrefix).append(".").append(joinColumn.getName());
       } else if (argumentValueList.get(ctr) != null) {
         builder.append(" ?");
+        String collateFunction = filterOperator.getCollateFunctionSQL();
+        if (collateFunction != null) {
+          builder.append(" ").append(collateFunction);
+        }
       }
     }
     return builder.toString();

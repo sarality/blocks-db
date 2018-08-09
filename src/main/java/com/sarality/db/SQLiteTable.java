@@ -87,8 +87,10 @@ public class SQLiteTable<T> implements Table<T> {
   @Override
   public synchronized final void open() throws SQLException {
     logger.info("Opening database for Table {} ", tableDefinition.getTableName());
-    this.database = dbProvider.getDatabase();
-    this.transactionManager = new SQLiteTransactionManager(database);
+    if (this.database == null || !this.database.isOpen()) {
+      this.database = dbProvider.getDatabase();
+      this.transactionManager = new SQLiteTransactionManager(database);
+    }
   }
 
   /**
@@ -97,10 +99,8 @@ public class SQLiteTable<T> implements Table<T> {
   @Override
   public synchronized final void close() {
     logger.debug("Closing database for Table {} ", tableDefinition.getTableName());
-    if (this.database != null && this.database.isOpen()) {
-      dbProvider.resetDatabase();
-    }
-    this.database = null;
+    // For simplicity in Multithreaded enviornments, we no longer resetDatabase here on the DBProvider
+    // The Database remains open and we make sure there is only one instance of the DbProvider per database.
   }
 
   private void assertDatabaseOpen() {

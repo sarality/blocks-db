@@ -18,6 +18,10 @@ public class TableRegistry {
     return INSTANCE;
   }
 
+  private TableRegistry() {
+    // Private Constructor to be used only by class.
+  }
+
   private final Map<String, Table<?>> tableMap = new HashMap<>();
   private final Map<String, List<TableDefinition>> dbTableDefinitionsMap = new HashMap<>();
 

@@ -48,9 +48,13 @@ public class SimpleQueryClause implements QueryClause {
   @Override
   public String getSelection() {
     StringBuilder builder = new StringBuilder("(");
-    builder.append(column.getName()).append(" ").append(operator.getSqlString());
+    builder.append(column.getName()).append(" ").append(operator.getSQL());
     if (value != null) {
       builder.append(" ?");
+    }
+    String collateFunction = operator.getCollateFunctionSQL();
+    if (collateFunction != null) {
+      builder.append(" ").append(collateFunction);
     }
     builder.append(")");
     return builder.toString();

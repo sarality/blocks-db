@@ -106,7 +106,8 @@ public class SQLiteTable<T> implements Table<T> {
     //   dbProvider.resetDatabase();
     // }
     // this.database = null;
-
+    // For simplicity in Multithreaded enviornments, we no longer resetDatabase here on the DBProvider
+    // The Database remains open and we make sure there is only one instance of the DbProvider per database.
   }
 
   private void assertDatabaseOpen() {

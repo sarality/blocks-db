@@ -36,6 +36,13 @@ public class DateTimeColumn extends BaseColumn implements ColumnValueReader<Date
       int day = date % 100;
 
       return DateTime.forDateOnly(year, month, day);
+    } else if (dataType.equals(DataType.TIME_AS_INT)) {
+        int time = cursor.getInt(index);
+        int hour = time / 10000;
+        int min = (time - hour * 10000) / 100;
+        int sec = time % 100;
+
+        return DateTime.forTimeOnly(hour, min, sec, 0);
     } else if (dataType.equals(DataType.DATETIME)) {
       String date = cursor.getString(index);
       return new DateTime(date);
@@ -48,6 +55,8 @@ public class DateTimeColumn extends BaseColumn implements ColumnValueReader<Date
   public String getQueryArgValue(Column column, DateTime value) {
     if (column.getDataType().equals(DataType.DATE_AS_INT)) {
       return String.valueOf(getDateAsIntValue(value));
+    } else if (column.getDataType().equals(DataType.TIME_AS_INT)) {
+      return String.valueOf(getTimeAsIntValue(value));
     } else if (column.getDataType().equals(DataType.DATETIME)) {
       return getDateAsStringValue(value);
     } else {
@@ -66,12 +75,20 @@ public class DateTimeColumn extends BaseColumn implements ColumnValueReader<Date
 
     if (column.getDataType().equals(DataType.DATE_AS_INT)) {
       contentValues.put(column.getName(), getDateAsIntValue(value));
+    } else if (column.getDataType().equals(DataType.TIME_AS_INT)) {
+        contentValues.put(column.getName(), getTimeAsIntValue(value));
     } else if (column.getDataType().equals(DataType.DATETIME)) {
       contentValues.put(column.getName(), getDateAsStringValue(value));
     } else {
       throw new IllegalArgumentException("Cannot add DateTime value to Column " + column.getName() +
           " with data type " + column.getDataType());
     }
+  }
+
+  private int getTimeAsIntValue(DateTime value) {
+    int hour = value.getHour() * 10000;
+    int min = value.getMinute() * 100;
+    return hour + min + value.getSecond();
   }
 
   private int getDateAsIntValue(DateTime value) {

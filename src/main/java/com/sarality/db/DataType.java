@@ -8,6 +8,7 @@ package com.sarality.db;
 public enum DataType {
   BIT_MASK("INTEGER"),
   DATE_AS_INT("INTEGER"),
+  TIME_AS_INT("INTEGER"),
   DATETIME("TEXT"),
   ENUM("TEXT"),
   INTEGER("INTEGER"),

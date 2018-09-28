@@ -78,6 +78,11 @@ public class SQLiteTable<T> implements Table<T> {
     return tableDefinition;
   }
 
+  @Override
+  public void init(DatabaseProvider provider) {
+    dbProvider = (SQLiteDatabaseProvider) provider;
+  }
+
   /**
    * Open a writable instance of the database.
    *
@@ -103,10 +108,10 @@ public class SQLiteTable<T> implements Table<T> {
     //
     //
     // if (this.database != null && this.database.isOpen()) {
-    //   dbProvider.resetDatabase();
+    //   dbProvider.closeDatabase();
     // }
     // this.database = null;
-    // For simplicity in Multithreaded enviornments, we no longer resetDatabase here on the DBProvider
+    // For simplicity in Multithreaded enviornments, we no longer closeDatabase here on the DBProvider
     // The Database remains open and we make sure there is only one instance of the DbProvider per database.
   }
 

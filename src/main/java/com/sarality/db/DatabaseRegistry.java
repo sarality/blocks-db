@@ -58,4 +58,11 @@ class DatabaseRegistry {
   DatabaseProvider getProvider(String dbName) {
     return providerMap.get(dbName);
   }
+
+  void closeDatabase(String dbName) {
+    DatabaseProvider dbProvider = getProvider(dbName);
+    if (dbProvider != null) {
+      dbProvider.closeDatabase();
+    }
+  }
 }

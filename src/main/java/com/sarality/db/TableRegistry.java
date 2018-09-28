@@ -54,6 +54,8 @@ public class TableRegistry {
     // Just Open and close the Table to initialize the database and the tables in it
     for (String tableName : tableMap.keySet()) {
       Table<?> table = tableMap.get(tableName);
+      String dbName = table.getTableDefinition().getDatabaseName();
+      table.init(dbRegistry.getProvider(dbName));
       try {
         table.open();
       } finally {
@@ -62,8 +64,7 @@ public class TableRegistry {
     }
   }
 
-  // TODO(abhideep): Find a different way to provide access to the Database Provider
-  public DatabaseProvider getDatabaseProvider(String dbName) {
-    return dbRegistry.getProvider(dbName);
+  public void closeDatabase(String dbName) {
+    dbRegistry.closeDatabase(dbName);
   }
 }

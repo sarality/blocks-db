@@ -98,4 +98,7 @@ public interface Table<T> {
    * @return Number of rows that were marked as deleted.
    */
   int markAsDeleted(T data, Query query);
+
+
+  void init(DatabaseProvider provider);
 }

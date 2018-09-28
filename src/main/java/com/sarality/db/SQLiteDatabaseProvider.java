@@ -46,8 +46,8 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
   }
 
   @Override
-  public void resetDatabase() {
-    if (this.database != null) {
+  public void closeDatabase() {
+    if (this.database != null && this.database.isOpen()) {
       this.database.close();
       this.database = null;
     }

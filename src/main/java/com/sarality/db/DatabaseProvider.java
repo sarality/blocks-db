@@ -13,7 +13,5 @@ public interface DatabaseProvider<D> {
 
   D getDatabase();
 
-  void resetDatabase();
-
-
+  void closeDatabase();
 }

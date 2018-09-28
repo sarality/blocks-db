@@ -1,7 +1,6 @@
 package com.sarality.db;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -79,6 +78,11 @@ public class SQLiteTable<T> implements Table<T> {
     return tableDefinition;
   }
 
+  @Override
+  public void init(DatabaseProvider provider) {
+    dbProvider = (SQLiteDatabaseProvider) provider;
+  }
+
   /**
    * Open a writable instance of the database.
    *
@@ -99,7 +103,15 @@ public class SQLiteTable<T> implements Table<T> {
   @Override
   public synchronized final void close() {
     logger.debug("Closing database for Table {} ", tableDefinition.getTableName());
-    // For simplicity in Multithreaded enviornments, we no longer resetDatabase here on the DBProvider
+    // NOTE!!!!! For simplicity we don't reset the database and DON"T set it's value to null
+    // Otherwise, we'd have to do something like this
+    //
+    //
+    // if (this.database != null && this.database.isOpen()) {
+    //   dbProvider.closeDatabase();
+    // }
+    // this.database = null;
+    // For simplicity in Multithreaded enviornments, we no longer closeDatabase here on the DBProvider
     // The Database remains open and we make sure there is only one instance of the DbProvider per database.
   }
 
@@ -107,21 +119,6 @@ public class SQLiteTable<T> implements Table<T> {
     if (database == null || !database.isOpen()) {
       throw new IllegalStateException(
           "Cannot perform operation since the database was either not opened or has already been closed.");
-    }
-  }
-
-  public void initDatabase(Context context, DatabaseRegistry databaseRegistry) {
-    String dbName = tableDefinition.getDatabaseName();
-    int dbVersion = tableDefinition.getTableVersion();
-    databaseRegistry.init(tableDefinition, new SQLiteDatabaseProvider(context, dbName, dbVersion));
-
-    dbProvider = (SQLiteDatabaseProvider) databaseRegistry.getProvider(dbName);
-
-    // Just Open and close the Table to initialize the database
-    try {
-      open();
-    } finally {
-      close();
     }
   }
 

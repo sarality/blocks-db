@@ -122,6 +122,30 @@ public class SQLiteTable<T> implements Table<T> {
     }
   }
 
+  public void attachDatabase(SQLiteTable<?> dbTable, String dbAlias) {
+    String sql = "ATTACH DATABASE ? AS " + dbAlias;
+    String[] queryArgs = new String[] {dbTable.getDbFilePath()};
+    execSQL(sql, queryArgs);
+  }
+
+  public void detachDatabase(String dbAlias) {
+    String sql = "DETACH DATABASE " + dbAlias;
+    execSQL(sql, null);
+  }
+
+  private String getDbFilePath() {
+    return dbProvider.getDbFilePath();
+  }
+
+  private void execSQL(String sql, String[] queryArgs) {
+    logger.info("Executing SQL {} with args {}", sql, queryArgs);
+    if (queryArgs == null || queryArgs.length == 0) {
+      database.execSQL(sql);
+    } else {
+      database.execSQL(sql, queryArgs);
+    }
+  }
+
   @Override
   public TransactionManager getTransactionManager() {
     return transactionManager;
@@ -167,15 +191,6 @@ public class SQLiteTable<T> implements Table<T> {
   public int delete(Query query) {
     assertDatabaseOpen();
     return database.delete(tableDefinition.getTableName(), query.getWhereClause(), query.getWhereClauseArguments());
-  }
-
-  public void execSQL(String sql, String[] queryArgs) {
-    logger.debug("Executing SQL {} with args {}", sql, queryArgs);
-    if (queryArgs == null || queryArgs.length == 0) {
-      database.execSQL(sql);
-    } else {
-      database.execSQL(sql, queryArgs);
-    }
   }
 
   /**

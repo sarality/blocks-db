@@ -20,11 +20,11 @@ public class SimpleJoinQueryBuilder {
   private final LogicalOperator operator;
 
   private final Map<String, String> tablePrefixMap = new HashMap<>();
+  private final Map<String, String> tableDbNameMap = new HashMap<>();
+  private final Map<String, String> dbAliasMap = new HashMap<>();
 
   private final String tableName;
-  private final String tableDbName;
   private final List<String> tableList = new ArrayList<>();
-  private final List<String> tableDbNameList = new ArrayList<>();
   private final List<Column[]> tableColumnList = new ArrayList<>();
   private final List<JoinType> joinTypeList = new ArrayList<>();
 
@@ -33,30 +33,37 @@ public class SimpleJoinQueryBuilder {
   private final List<String> argumentValueList = new ArrayList<>();
   private final List<Column> joinColumnList = new ArrayList<>();
 
-  public SimpleJoinQueryBuilder(String tableName, String tableDbName, String tablePrefix, Column[] columns) {
+  public SimpleJoinQueryBuilder(String tableName, String tablePrefix, Column[] columns) {
+    this(null, null, tableName, tablePrefix, columns);
+  }
+
+  public SimpleJoinQueryBuilder(String dbName, String dbAlias, String tableName, String tablePrefix,
+      Column[] columns) {
     this.operator = LogicalOperator.AND;
     this.tableName = tableName;
-    this.tableDbName = tableDbName;
     tableColumnList.add(columns);
     tablePrefixMap.put(tableName, tablePrefix);
-  }
-
-  public SimpleJoinQueryBuilder join(String tableName, String tableDbName, String tablePrefix,
-      Column[] columns, JoinType joinType) {
-    tableList.add(tableName);
-    tableDbNameList.add(tableDbName);
-    tableColumnList.add(columns);
-    tablePrefixMap.put(tableName, tablePrefix);
-    joinTypeList.add(joinType);
-    return this;
-  }
-
-  public SimpleJoinQueryBuilder(String tableName, String tablePrefix, Column[] columns) {
-    this(tableName, null, tablePrefix, columns);
+    if (dbName != null && dbAlias != null) {
+      tableDbNameMap.put(tableName, dbName);
+      dbAliasMap.put(dbName, dbAlias);
+    }
   }
 
   public SimpleJoinQueryBuilder join(String tableName, String tablePrefix, Column[] columns, JoinType joinType) {
-    return join(tableName, null, tablePrefix, columns, joinType);
+    return join(null, null, tableName, tablePrefix, columns, joinType);
+  }
+
+  public SimpleJoinQueryBuilder join(String dbName, String dbAlias, String tableName, String tablePrefix,
+      Column[] columns, JoinType joinType) {
+    tableList.add(tableName);
+    tableColumnList.add(columns);
+    tablePrefixMap.put(tableName, tablePrefix);
+    joinTypeList.add(joinType);
+    if (dbName != null && dbAlias != null) {
+      tableDbNameMap.put(tableName, dbName);
+      dbAliasMap.put(dbName, dbAlias);
+    }
+    return this;
   }
 
   public SimpleJoinQueryBuilder joinFilter(Column column, Column joinColumn) {
@@ -87,15 +94,16 @@ public class SimpleJoinQueryBuilder {
     return withFilter(column, operator, new DateTimeColumn(null).getQueryArgValue(column,value));
   }
 
-  public List<String> getDatabaseList() {
-    List<String> dbList = new ArrayList<>();
-    dbList.add(tableDbName);
-    dbList.addAll(tableDbNameList);
-    return dbList;
+  public List<String> getTablesWithDbAlias() {
+    if (tableDbNameMap.isEmpty()) {
+      return null;
+    }
+    return new ArrayList<>(tableDbNameMap.keySet());
   }
 
-  public String getDatabaseAlias(String dbName) {
-    return dbName.replace('.', '_');
+  public String getDatabaseAlias(String tableName) {
+    String dbName = tableDbNameMap.get(tableName);
+    return dbAliasMap.get(dbName);
   }
 
   private String getTablePrefix(String tableName) {
@@ -124,16 +132,19 @@ public class SimpleJoinQueryBuilder {
 
   private String getFromClause() {
     StringBuilder builder = new StringBuilder(" FROM ");
+    String tableDbName = tableDbNameMap.get(tableName);
     if (tableDbName != null) {
-      builder.append(getDatabaseAlias(tableDbName)).append(".");
+      String dbAlias = dbAliasMap.get(tableDbName);
+      builder.append(dbAlias).append(".");
     }
     builder.append(tableName).append(" ").append(getTablePrefix(tableName));
     int ctr = 0;
     for (String joinTable : tableList) {
       builder.append(joinTypeList.get(ctr).getSQLString());
-      String joinTableDbName = tableDbNameList.get(ctr);
+      String joinTableDbName = tableDbNameMap.get(joinTable);
       if (joinTableDbName != null) {
-        builder.append(getDatabaseAlias(joinTableDbName)).append(".");
+        String dbAlias = dbAliasMap.get(joinTableDbName);
+        builder.append(dbAlias).append(".");
       }
       builder.append(joinTable).append(" ").append(getTablePrefix(joinTable));
       ctr++;

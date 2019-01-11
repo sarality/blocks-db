@@ -169,6 +169,15 @@ public class SQLiteTable<T> implements Table<T> {
     return database.delete(tableDefinition.getTableName(), query.getWhereClause(), query.getWhereClauseArguments());
   }
 
+  public void execSQL(String sql, String[] queryArgs) {
+    logger.debug("Executing SQL {} with args {}", sql, queryArgs);
+    if (queryArgs == null || queryArgs.length == 0) {
+      database.execSQL(sql);
+    } else {
+      database.execSQL(sql, queryArgs);
+    }
+  }
+
   /**
    * Retrieve the set of rows from the table for the given query.
    *

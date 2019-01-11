@@ -22,7 +22,9 @@ public class SimpleJoinQueryBuilder {
   private final Map<String, String> tablePrefixMap = new HashMap<>();
 
   private final String tableName;
+  private final String tableDbName;
   private final List<String> tableList = new ArrayList<>();
+  private final List<String> tableDbNameList = new ArrayList<>();
   private final List<Column[]> tableColumnList = new ArrayList<>();
   private final List<JoinType> joinTypeList = new ArrayList<>();
 
@@ -31,19 +33,30 @@ public class SimpleJoinQueryBuilder {
   private final List<String> argumentValueList = new ArrayList<>();
   private final List<Column> joinColumnList = new ArrayList<>();
 
-  public SimpleJoinQueryBuilder(String tableName, String tablePrefix, Column[] columns) {
+  public SimpleJoinQueryBuilder(String tableName, String tableDbName, String tablePrefix, Column[] columns) {
     this.operator = LogicalOperator.AND;
     this.tableName = tableName;
+    this.tableDbName = tableDbName;
     tableColumnList.add(columns);
     tablePrefixMap.put(tableName, tablePrefix);
   }
 
-  public SimpleJoinQueryBuilder join(String tableName, String tablePrefix, Column[] columns, JoinType joinType) {
+  public SimpleJoinQueryBuilder join(String tableName, String tableDbName, String tablePrefix,
+      Column[] columns, JoinType joinType) {
     tableList.add(tableName);
+    tableDbNameList.add(tableDbName);
     tableColumnList.add(columns);
     tablePrefixMap.put(tableName, tablePrefix);
     joinTypeList.add(joinType);
     return this;
+  }
+
+  public SimpleJoinQueryBuilder(String tableName, String tablePrefix, Column[] columns) {
+    this(tableName, null, tablePrefix, columns);
+  }
+
+  public SimpleJoinQueryBuilder join(String tableName, String tablePrefix, Column[] columns, JoinType joinType) {
+    return join(tableName, null, tablePrefix, columns, joinType);
   }
 
   public SimpleJoinQueryBuilder joinFilter(Column column, Column joinColumn) {
@@ -58,6 +71,10 @@ public class SimpleJoinQueryBuilder {
     return withFilter(column, Operator.EQUALS, String.valueOf(value));
   }
 
+  public SimpleJoinQueryBuilder withFilter(Column column, Operator operator) {
+    return withFilter(column, operator, (String) null);
+  }
+
   public SimpleJoinQueryBuilder withFilter(Column column, Operator operator, String value) {
     columnList.add(column);
     operatorList.add(operator);
@@ -70,7 +87,18 @@ public class SimpleJoinQueryBuilder {
     return withFilter(column, operator, new DateTimeColumn(null).getQueryArgValue(column,value));
   }
 
-  public String getTablePrefix(String tableName) {
+  public List<String> getDatabaseList() {
+    List<String> dbList = new ArrayList<>();
+    dbList.add(tableDbName);
+    dbList.addAll(tableDbNameList);
+    return dbList;
+  }
+
+  public String getDatabaseAlias(String dbName) {
+    return dbName.replace('.', '_');
+  }
+
+  private String getTablePrefix(String tableName) {
     return tablePrefixMap.get(tableName);
   }
 
@@ -95,12 +123,19 @@ public class SimpleJoinQueryBuilder {
   }
 
   private String getFromClause() {
-    StringBuilder builder = new StringBuilder(" FROM ").append(tableName).append(" ")
-        .append(getTablePrefix(tableName));
+    StringBuilder builder = new StringBuilder(" FROM ");
+    if (tableDbName != null) {
+      builder.append(getDatabaseAlias(tableDbName)).append(".");
+    }
+    builder.append(tableName).append(" ").append(getTablePrefix(tableName));
     int ctr = 0;
     for (String joinTable : tableList) {
-      builder.append(joinTypeList.get(ctr).getSQLString()).append(joinTable).append(" ")
-          .append(getTablePrefix(joinTable));
+      builder.append(joinTypeList.get(ctr).getSQLString());
+      String joinTableDbName = tableDbNameList.get(ctr);
+      if (joinTableDbName != null) {
+        builder.append(getDatabaseAlias(joinTableDbName)).append(".");
+      }
+      builder.append(joinTable).append(" ").append(getTablePrefix(joinTable));
       ctr++;
     }
     return builder.toString();

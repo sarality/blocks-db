@@ -122,18 +122,37 @@ public class SQLiteTable<T> implements Table<T> {
     }
   }
 
-  public void attachDatabase(SQLiteTable<?> dbTable, String dbAlias) {
+  /**
+   * Attach the Database for a different table to the current connection for join across multiple databases.
+   *
+   * TODO(abhideep): Encapsulate this is DatabaseMetadata so that the incorrect data cannot be passed in.
+   * @param dbFilePath File Path to the Database
+   * @param dbAlias Alias for the Database
+   */
+  public void attachDatabase(String dbFilePath, String dbAlias) {
     String sql = "ATTACH DATABASE ? AS " + dbAlias;
-    String[] queryArgs = new String[] {dbTable.getDbFilePath()};
+    String[] queryArgs = new String[] {dbFilePath};
     execSQL(sql, queryArgs);
   }
 
+  /**
+   * Deatch the Database for a different table that was attached to the current connection for join across
+   * multiple databases.
+   *
+   * TODO(abhideep): Encapsulate this is DatabaseMetadata so that the incorrect data cannot be passed in.
+   * @param dbAlias Alias of the Database that was attached.
+   */
   public void detachDatabase(String dbAlias) {
     String sql = "DETACH DATABASE " + dbAlias;
     execSQL(sql, null);
   }
 
-  private String getDbFilePath() {
+  /**
+   * TODO(abhideep): Return DatabaseMetadata so that the incorrect data cannot be passed in.
+   *
+   * @return File Path to the Tables database
+   */
+  public String getDbFilePath() {
     return dbProvider.getDbFilePath();
   }
 

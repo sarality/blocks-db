@@ -122,9 +122,9 @@ public class SQLiteTable<T> implements Table<T> {
     }
   }
 
-  public void attachDatabase(SQLiteTable<?> dbTable, String dbAlias) {
+  public void attachDatabase(String dbFilePath, String dbAlias) {
     String sql = "ATTACH DATABASE ? AS " + dbAlias;
-    String[] queryArgs = new String[] {dbTable.getDbFilePath()};
+    String[] queryArgs = new String[] {dbFilePath};
     execSQL(sql, queryArgs);
   }
 
@@ -133,7 +133,7 @@ public class SQLiteTable<T> implements Table<T> {
     execSQL(sql, null);
   }
 
-  private String getDbFilePath() {
+  public String getDbFilePath() {
     return dbProvider.getDbFilePath();
   }
 

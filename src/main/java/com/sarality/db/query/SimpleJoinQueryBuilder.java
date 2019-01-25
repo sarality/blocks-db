@@ -70,28 +70,37 @@ public class SimpleJoinQueryBuilder {
   public SimpleJoinQueryBuilder joinFilter(Column column, Column joinColumn) {
     String columnTableName = column.getTableName();
     String joinColumnTableName = joinColumn.getTableName();
+    Column lhsColumn = column;
+    Column rhsColumn = joinColumn;
     if (joinColumnTableName.equals(tableName)) {
-      throw new IllegalArgumentException("Cannot set Join Filter on Primary Table " + tableName);
-    }
-    // If the column is the main table, then any join is fine since it is set on the Join Table
-    if (!columnTableName.equals(tableName)) {
-      // Other make sure that the join Table is defined after the Table for the first column
+      lhsColumn = joinColumn;
+      rhsColumn = column;
+    } else if (columnTableName.equals(tableName)) {
+      lhsColumn = column;
+      rhsColumn = joinColumn;
+    } else {
+      // If neither is the main table, make sure that the columns appear in the order that the tables joins
+      // were defined.
       for (String joinTable: joinTableList) {
-        // If we reached joinColumnTable before we reach the Table for the column, the order of columns is wrong
-        if (joinTable.equals(joinColumnTableName)) {
-          throw new IllegalArgumentException("Join Filter must be set table that is defined first "
-              + joinColumnTableName);
-        }
+
         if (joinTable.equals(columnTableName)) {
+          lhsColumn = column;
+          rhsColumn = joinColumn;
+          break;
+        }
+        if (joinTable.equals(joinColumnTableName)) {
+          lhsColumn = joinColumn;
+          rhsColumn = column;
           break;
         }
       }
     }
+    String rhsColumnTableName = rhsColumn.getTableName();
 
-    if (!joinClauseListMap.containsKey(joinColumnTableName)) {
-      joinClauseListMap.put(joinColumnTableName, new ArrayList<JoinClause>());
+    if (!joinClauseListMap.containsKey(rhsColumnTableName)) {
+      joinClauseListMap.put(rhsColumnTableName, new ArrayList<JoinClause>());
     }
-    joinClauseListMap.get(joinColumnTableName).add(new JoinClause(column, Operator.EQUALS, joinColumn));
+    joinClauseListMap.get(rhsColumnTableName).add(new JoinClause(lhsColumn, Operator.EQUALS, rhsColumn));
     return this;
   }
 

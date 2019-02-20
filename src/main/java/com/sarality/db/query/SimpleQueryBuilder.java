@@ -126,7 +126,6 @@ public class SimpleQueryBuilder {
         builder.append(",");
       }
       builder.append(column.getName()).append(" ").append(orderByColumnMap.get(column).toString());
-
       ctr++;
     }
     return builder.toString();

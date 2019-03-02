@@ -3,7 +3,9 @@ package com.sarality.db.query;
 import com.sarality.db.Column;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import hirondelle.date4j.DateTime;
 
@@ -18,6 +20,8 @@ public class SimpleQueryBuilder {
   private final List<QueryClause> clauseList = new ArrayList<>();
   private final List<AggregateMeasure> measuresList = new ArrayList<>();
   private final List<Column> groupByColumnList = new ArrayList<>();
+  private final Map<Column, SortOrder> orderByColumnMap = new HashMap<>();
+
   private Long limitSize;
   private Long limitOffset;
 
@@ -68,6 +72,15 @@ public class SimpleQueryBuilder {
     return this;
   }
 
+  public SimpleQueryBuilder orderBy(Column orderColumn) {
+    return orderBy(orderColumn, SortOrder.ASC);
+  }
+
+  public SimpleQueryBuilder orderBy(Column orderColumn, SortOrder sortOrder) {
+    orderByColumnMap.put(orderColumn, sortOrder);
+    return this;
+  }
+
   public SimpleQueryBuilder groupBy(Column dimension) {
     groupByColumnList.add(dimension);
     return this;
@@ -105,6 +118,19 @@ public class SimpleQueryBuilder {
     return argumentList.toArray(new String[argumentList.size()]);
   }
 
+  private String getOrderByClause() {
+    StringBuilder builder = new StringBuilder();
+    int ctr = 0;
+    for (Column column : orderByColumnMap.keySet()) {
+      if (ctr > 0) {
+        builder.append(",");
+      }
+      builder.append(column.getName()).append(" ").append(orderByColumnMap.get(column).toString());
+      ctr++;
+    }
+    return builder.toString();
+  }
+
   private String getGroupByClause() {
     StringBuilder builder = new StringBuilder();
     int ctr = 0;
@@ -121,11 +147,11 @@ public class SimpleQueryBuilder {
 
   private String[] getSelectColumns() {
     List<String> tableColumnList = new ArrayList<>();
-    for (Column column: groupByColumnList) {
+    for (Column column : groupByColumnList) {
       tableColumnList.add(column.getName());
     }
 
-    for (AggregateMeasure measure: measuresList) {
+    for (AggregateMeasure measure : measuresList) {
       String columnName = measure.getFunction() + "(" + measure.getColumn().getName() + ") AS " + measure.getFunction
           () + "_" + measure.getColumn().getName();
       tableColumnList.add(columnName);
@@ -135,6 +161,6 @@ public class SimpleQueryBuilder {
 
   public Query build() {
     return new Query(getSelectColumns(), getWhereClause(), getArguments(),
-        null, getGroupByClause(), null, limitSize, limitOffset);
+        getOrderByClause(), getGroupByClause(), null, limitSize, limitOffset);
   }
 }

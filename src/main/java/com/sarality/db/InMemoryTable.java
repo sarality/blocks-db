@@ -1,7 +1,6 @@
 package com.sarality.db;
 
 import android.content.ContentValues;
-import android.content.Context;
 
 import com.sarality.db.query.ParsedQuery;
 import com.sarality.db.query.Query;
@@ -62,7 +61,7 @@ public abstract class InMemoryTable<T> implements Table<T> {
   }
 
   @Override
-  public void initDatabase(Context context, DatabaseRegistry dbRegistry) {
+  public void init(DatabaseProvider provider) {
     // Nothing needs to be done to initialize InMemoryTable
   }
 

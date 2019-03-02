@@ -1,7 +1,6 @@
 package com.sarality.db;
 
 import android.content.ContentValues;
-import android.content.Context;
 
 import com.sarality.db.query.Query;
 
@@ -23,8 +22,6 @@ public interface Table<T> {
    * @return Metadata for the Table that defines the columns, db, version, and schema upates for the table
    */
   TableDefinition getTableDefinition();
-
-  void initDatabase(Context context, DatabaseRegistry dbRegistry);
 
   /**
    * Open the table's database for reading / writing
@@ -101,4 +98,7 @@ public interface Table<T> {
    * @return Number of rows that were marked as deleted.
    */
   int markAsDeleted(T data, Query query);
+
+
+  void init(DatabaseProvider provider);
 }

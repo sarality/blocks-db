@@ -22,6 +22,7 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
 
   private final String dbName;
   private final int dbVersion;
+  private final String dbFilePath;
   private List<TableDefinition> definitionList;
 
   private SQLiteDatabase database;
@@ -30,11 +31,16 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
     super(context, dbName, null, dbVersion);
     this.dbName = dbName;
     this.dbVersion = dbVersion;
+    this.dbFilePath = context.getDatabasePath(dbName).getPath();
   }
 
   @Override
   public void init(List<TableDefinition> definitionList) {
     this.definitionList = definitionList;
+  }
+
+  public String getDbFilePath() {
+    return dbFilePath;
   }
 
   @Override
@@ -46,8 +52,8 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
   }
 
   @Override
-  public void resetDatabase() {
-    if (this.database != null) {
+  public void closeDatabase() {
+    if (this.database != null && this.database.isOpen()) {
       this.database.close();
       this.database = null;
     }

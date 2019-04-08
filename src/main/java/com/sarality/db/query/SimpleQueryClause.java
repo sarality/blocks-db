@@ -19,18 +19,43 @@ public class SimpleQueryClause implements QueryClause {
 
   private final Column column;
   private final Operator operator;
-  private final String value;
+  private final String argValue;
+  private final List<String> argValueList;
 
   public SimpleQueryClause(Column column, Operator operator, String value) {
     this.column = column;
     this.operator = operator;
-    this.value = value;
+    this.argValue = value;
+    this.argValueList = null;
   }
 
   public SimpleQueryClause(Column column, Operator operator) {
     this.column = column;
     this.operator = operator;
-    this.value = null;
+    this.argValue = null;
+    this.argValueList = null;
+  }
+
+  public SimpleQueryClause(Column column, Operator operator, List<String> valueList) {
+    this.column = column;
+    this.operator = operator;
+    this.argValue = null;
+    this.argValueList = valueList;
+  }
+
+  public static List<String> toStringList(Column column, List<Long> valueList) {
+    if (valueList == null) {
+      return null;
+    }
+    if (valueList.isEmpty()) {
+      return new ArrayList<>();
+    }
+    List<String> stringValueList = new ArrayList<>();
+    LongColumn longColumn = new LongColumn(null);
+    for (Long value : valueList) {
+      stringValueList.add(longColumn.getQueryArgValue(column, value));
+    }
+    return stringValueList;
   }
 
   public SimpleQueryClause(Column column, Operator operator, Long value) {
@@ -49,8 +74,21 @@ public class SimpleQueryClause implements QueryClause {
   public String getSelection() {
     StringBuilder builder = new StringBuilder("(");
     builder.append(column.getName()).append(" ").append(operator.getSQL());
-    if (value != null) {
+    if (argValue != null) {
       builder.append(" ?");
+    }
+    if (argValueList != null && !argValueList.isEmpty()) {
+      builder.append(" (");
+      int ctr = 0;
+      for (String argValue : argValueList) {
+        if (ctr > 0) {
+          builder.append(", ?");
+        } else {
+          builder.append("?");
+        }
+        ctr++;
+      }
+      builder.append(")");
     }
     String collateFunction = operator.getCollateFunctionSQL();
     if (collateFunction != null) {
@@ -62,11 +100,15 @@ public class SimpleQueryClause implements QueryClause {
 
   @Override
   public List<String> getSelectionArguments() {
-    if (value == null) {
+    if (argValue == null && argValueList == null) {
       return null;
     }
     List<String> valueList = new ArrayList<>();
-    valueList.add(value);
+    if (argValue != null) {
+      valueList.add(argValue);
+    } else {
+      valueList.addAll(argValueList);
+    }
     return valueList;
   }
 }

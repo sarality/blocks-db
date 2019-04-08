@@ -8,6 +8,7 @@ package com.sarality.db.query;
 public enum Operator {
   EQUALS("="),
   EQUALS_IGNORE_CASE("=", "COLLATE NOCASE"),
+  IN("IN"),
   NOT_EQUALS("<>"),
   LESS_THAN("<"),
   LESS_THAN_EQUAL_TO("<="),

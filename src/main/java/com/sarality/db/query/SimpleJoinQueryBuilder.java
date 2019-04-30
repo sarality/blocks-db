@@ -119,6 +119,14 @@ public class SimpleJoinQueryBuilder {
     return this;
   }
 
+  public SimpleJoinQueryBuilder withFilter(Column column, Operator operator, Long value) {
+    return withFilter(column, operator, String.valueOf(value));
+  }
+
+  public SimpleJoinQueryBuilder withFilter(Column column, Operator operator, Double value) {
+    return withFilter(column, operator, String.valueOf(value));
+  }
+
   public SimpleJoinQueryBuilder withFilter(Column column, Operator operator, DateTime value) {
     return withFilter(column, operator, new DateTimeColumn(null).getQueryArgValue(column,value));
   }

@@ -41,6 +41,11 @@ public class SimpleQueryBuilder {
     return withFilter(column, Operator.EQUALS, value);
   }
 
+  public SimpleQueryBuilder withFilter(Column column, List<Long> valueList) {
+    return withFilter(new SimpleQueryClause(column, Operator.IN,
+        SimpleQueryClause.toStringList(column, valueList)));
+  }
+
   public <E extends Enum<E>> SimpleQueryBuilder withFilter(Column column, E value, Class<E> enumClass) {
     return withFilter(column, Operator.EQUALS, value, enumClass);
   }

@@ -39,7 +39,7 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
     this.definitionList = definitionList;
   }
 
-  public String getDbFilePath() {
+  String getDbFilePath() {
     return dbFilePath;
   }
 
@@ -93,9 +93,9 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
         logger.info("Running upgrade operations for table {} in version {}.", definition.getTableName(), version);
 
         // Is this a new table in this version
-        List<SchemaUpdate> updatesList = classifier.getVersionUpdatesForType(version, SchemaUpdateType.CREATE_TABLE);
+        List<SchemaUpdate> newTableList = classifier.getVersionUpdatesForType(version, SchemaUpdateType.CREATE_TABLE);
 
-        if (updatesList != null && updatesList.size() > 0) {
+        if (newTableList != null && !newTableList.isEmpty()) {
           // Create the table - sql
           logger.info("Create Table SQL: {} ", TableSQLGenerator.getCreateSql(definition.getTableName(),
               definition.getColumns()));
@@ -108,9 +108,10 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
         }
 
         // Are there any new columns added?
-        updatesList = classifier.getVersionUpdatesForType(version, SchemaUpdateType.ADD_COLUMN);
-        if (updatesList != null && updatesList.size() > 0) {
-          for (SchemaUpdate schemaUpdate : updatesList) {
+        List<SchemaUpdate> updateColumnList = classifier.getVersionUpdatesForType(
+            version, SchemaUpdateType.ADD_COLUMN);
+        if (updateColumnList != null && !updateColumnList.isEmpty()) {
+          for (SchemaUpdate schemaUpdate : updateColumnList) {
             AddColumnSchemaUpdate addColumn = (AddColumnSchemaUpdate) schemaUpdate;
             logger.info("Add Column SQL: {} ",
                 TableSQLGenerator.getAddColumnSql(definition.getTableName(),
@@ -123,8 +124,23 @@ class SQLiteDatabaseProvider extends SQLiteOpenHelper implements DatabaseProvide
         }
 
         // Are there any new Indexes that need to created
-        updatesList = classifier.getVersionUpdatesForType(version, SchemaUpdateType.ADD_INDEX);
-        createIndexes(db, definition, updatesList);
+        List<SchemaUpdate> updateIndexList = classifier.getVersionUpdatesForType(
+            version, SchemaUpdateType.ADD_INDEX);
+        createIndexes(db, definition, updateIndexList);
+
+        List<SchemaUpdate> updateValueList = classifier.getVersionUpdatesForType(
+            version, SchemaUpdateType.UPDATE_COLUMN_VALUE);
+        if (updateValueList != null && !updateValueList.isEmpty()) {
+          for (SchemaUpdate schemaUpdate : updateValueList) {
+            UpdateColumnValueSchemaUpdate updateColumnValue = (UpdateColumnValueSchemaUpdate) schemaUpdate;
+            logger.info("Update Column Value SQL: {} ",
+                TableSQLGenerator.getUpdateColumnValueSql(definition.getTableName(),
+                    updateColumnValue.getColumn(), updateColumnValue.getValue(), updateColumnValue.getWhereClause()));
+
+            db.execSQL(TableSQLGenerator.getUpdateColumnValueSql(definition.getTableName(),
+                updateColumnValue.getColumn(), updateColumnValue.getValue(), updateColumnValue.getWhereClause()));
+          }
+        }
       } // For version loop
     }
   }

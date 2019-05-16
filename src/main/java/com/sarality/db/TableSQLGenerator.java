@@ -1,5 +1,7 @@
 package com.sarality.db;
 
+import android.text.TextUtils;
+
 import java.util.List;
 
 /**
@@ -9,7 +11,7 @@ import java.util.List;
  */
 public class TableSQLGenerator {
 
-  public static String getCreateSql(String tableName, Column[] columns) {
+  static String getCreateSql(String tableName, Column[] columns) {
     StringBuilder builder = new StringBuilder("CREATE TABLE ");
     builder.append(tableName).append(" (\n");
     int columnIndex = 0;
@@ -29,11 +31,23 @@ public class TableSQLGenerator {
     return builder.toString();
   }
 
-  public static String getDropSql(String tableName) {
-    return "DROP TABLE IF EXISTS " + tableName;
+  static String getUpdateColumnValueSql(String tableName, Column column, String value, String whereClause) {
+    //UPDATE tableName SET columnName = 'value'
+
+    StringBuilder builder = new StringBuilder("UPDATE ").append(tableName).append("\n");
+    builder = builder.append("SET ").append(column.getName()).append(" = ");
+    if (column.getDataType().getSqlType().equals("TEXT")) {
+      builder = builder.append("'").append(value).append("'");
+    } else {
+      builder = builder.append(value);
+    }
+    if (!TextUtils.isEmpty(whereClause)) {
+      builder.append("WHERE ").append(whereClause);
+    }
+    return builder.toString();
   }
 
-  public static String getAddColumnSql(String tableName, Column column) {
+  static String getAddColumnSql(String tableName, Column column) {
     //ALTER TABLE tableName ADD COLUMN
 
     StringBuilder builder = new StringBuilder("ALTER TABLE ");
@@ -48,7 +62,7 @@ public class TableSQLGenerator {
     return builder.toString();
   }
 
-  public static String getCreateIndexSql(String tableName, String indexName, List<Column> columns) {
+  static String getCreateIndexSql(String tableName, String indexName, List<Column> columns) {
     // CREATE INDEX indexName ON tableName (column1, column2)
 
     StringBuilder builder = new StringBuilder("CREATE INDEX ").append(indexName);
@@ -63,6 +77,10 @@ public class TableSQLGenerator {
     }
     builder.append(")");
     return builder.toString();
+  }
+
+  static String getDropTableSql(String tableName) {
+    return "DROP TABLE IF EXISTS " + tableName;
   }
 
   public static String getDropColumnsSql(TableDefinition oldTableDefinition, Column[] columnsToDrop) {

@@ -1,5 +1,7 @@
 package com.sarality.db.query;
 
+import android.text.TextUtils;
+
 import com.sarality.db.Column;
 import com.sarality.db.io.DateTimeColumn;
 import com.sarality.db.io.EnumColumn;
@@ -7,6 +9,7 @@ import com.sarality.db.io.LongColumn;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import hirondelle.date4j.DateTime;
 
@@ -72,7 +75,21 @@ public class SimpleQueryClause implements QueryClause {
 
   @Override
   public String getSelection() {
+    return getSelection(null);
+  }
+
+  @Override
+  public String getSelection(Map<String, String> tablePrefixMap) {
+    String tableName = column.getTableName();
+
     StringBuilder builder = new StringBuilder("(");
+    if (tablePrefixMap != null) {
+      String columnTablePrefix = tablePrefixMap.get(tableName);
+      if (!TextUtils.isEmpty(columnTablePrefix)) {
+        builder.append(columnTablePrefix).append(".");
+      }
+    }
+
     builder.append(column.getName()).append(" ").append(operator.getSQL());
     if (argValue != null) {
       builder.append(" ?");

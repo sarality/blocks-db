@@ -3,6 +3,7 @@ package com.sarality.db.query;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A Compound QueryClause composed by performing an AND or an OR on multiple Query Clauses
@@ -25,13 +26,18 @@ public class CompoundQueryClause implements QueryClause {
 
   @Override
   public String getSelection() {
+    return getSelection(null);
+  }
+
+  @Override
+  public String getSelection(Map<String, String> tablePrefixMap) {
     StringBuilder builder = new StringBuilder("(");
     int ctr = 0;
     for (QueryClause clause : clauseList) {
       if (ctr > 0) {
         builder.append(" ").append(logicalOperator.toString()).append(" ");
       }
-      builder.append(clause.getSelection());
+      builder.append(clause.getSelection(tablePrefixMap));
       ctr++;
     }
     builder.append(")");

@@ -30,9 +30,7 @@ public class SimpleJoinQueryBuilder {
   private final List<JoinType> joinTypeList = new ArrayList<>();
   private final Map<String, List<JoinClause>> joinClauseListMap = new HashMap<>();
 
-  private final List<Column> columnList = new ArrayList<>();
-  private final List<Operator> operatorList = new ArrayList<>();
-  private final List<String> argumentValueList = new ArrayList<>();
+  private final List<QueryClause> clauseList = new ArrayList<>();
 
   public SimpleJoinQueryBuilder(String tableName, String tablePrefix, Column[] columns) {
     this(null, null, tableName, tablePrefix, columns);
@@ -112,11 +110,18 @@ public class SimpleJoinQueryBuilder {
     return withFilter(column, operator, (String) null);
   }
 
-  public SimpleJoinQueryBuilder withFilter(Column column, Operator operator, String value) {
-    columnList.add(column);
-    operatorList.add(operator);
-    argumentValueList.add(value);
+  public SimpleJoinQueryBuilder withFilter(CompoundQueryClause queryClause) {
+    clauseList.add(queryClause);
     return this;
+  }
+
+  public SimpleJoinQueryBuilder withFilter(SimpleQueryClause queryClause) {
+    clauseList.add(queryClause);
+    return this;
+  }
+
+  public SimpleJoinQueryBuilder withFilter(Column column, Operator operator, String value) {
+    return withFilter(new SimpleQueryClause(column, operator, value));
   }
 
   public SimpleJoinQueryBuilder withFilter(Column column, Operator operator, Long value) {
@@ -222,47 +227,36 @@ public class SimpleJoinQueryBuilder {
   }
 
   private String getWhereClause() {
-    if (columnList.isEmpty()) {
+    if (clauseList.isEmpty()) {
       return "";
     }
     StringBuilder builder = new StringBuilder();
-    int numFilters = columnList.size();
+    int numFilters = clauseList.size();
     for (int ctr = 0; ctr < numFilters; ctr++) {
-      Column column = columnList.get(ctr);
-      String tableName = column.getTableName();
-      String columnPrefix = getTablePrefix(tableName);
-
-      Operator filterOperator = operatorList.get(ctr);
+      QueryClause clause = clauseList.get(ctr);
 
       if (ctr == 0) {
         builder.append(" WHERE ");
       } else {
         builder.append(" ").append(operator.toString()).append(" ");
       }
-      builder.append(columnPrefix).append(".").append(column.getName())
-          .append(" ").append(filterOperator.getSQL());
-      if (argumentValueList.get(ctr) != null) {
-        builder.append(" ?");
-        String collateFunction = filterOperator.getCollateFunctionSQL();
-        if (collateFunction != null) {
-          builder.append(" ").append(collateFunction);
-        }
-      }
+      builder.append(clause.getSelection(tablePrefixMap));
     }
     return builder.toString();
   }
 
   private String[] getArguments() {
-    if (argumentValueList.isEmpty()) {
+    if (clauseList.isEmpty()) {
       return null;
     }
     List<String> valueList = new ArrayList<>();
-    for (String argumentValue : argumentValueList) {
-      if (argumentValue != null) {
-        valueList.add(argumentValue);
+    for (QueryClause clause : clauseList) {
+      List<String> argumentValueList = clause.getSelectionArguments();
+      if (argumentValueList != null) {
+        valueList.addAll(argumentValueList);
       }
     }
-    return valueList.toArray(new String[valueList.size()]);
+    return valueList.toArray(new String[0]);
   }
 
   public RawQuery build() {

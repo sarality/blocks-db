@@ -1,5 +1,7 @@
 package com.sarality.db.query;
 
+import android.text.TextUtils;
+
 import com.sarality.db.Column;
 import com.sarality.db.io.DateTimeColumn;
 
@@ -31,6 +33,7 @@ public class SimpleJoinQueryBuilder {
   private final Map<String, List<JoinClause>> joinClauseListMap = new HashMap<>();
 
   private final List<QueryClause> clauseList = new ArrayList<>();
+  private final Map<Column, SortOrder> orderByColumnMap = new HashMap<>();
 
   public SimpleJoinQueryBuilder(String tableName, String tablePrefix, Column[] columns) {
     this(null, null, tableName, tablePrefix, columns);
@@ -134,6 +137,15 @@ public class SimpleJoinQueryBuilder {
 
   public SimpleJoinQueryBuilder withFilter(Column column, Operator operator, DateTime value) {
     return withFilter(column, operator, new DateTimeColumn(null).getQueryArgValue(column,value));
+  }
+
+  public SimpleJoinQueryBuilder orderBy(Column orderColumn) {
+    return orderBy(orderColumn, SortOrder.ASC);
+  }
+
+  public SimpleJoinQueryBuilder orderBy(Column orderColumn, SortOrder sortOrder) {
+    orderByColumnMap.put(orderColumn, sortOrder);
+    return this;
   }
 
   public List<String> getTablesWithDbAlias() {
@@ -259,12 +271,37 @@ public class SimpleJoinQueryBuilder {
     return valueList.toArray(new String[0]);
   }
 
+  private String getOrderByClause() {
+    StringBuilder builder = new StringBuilder();
+    int ctr = 0;
+    for (Column column : orderByColumnMap.keySet()) {
+      if (ctr > 0) {
+        builder.append(",");
+      }
+
+      String tableName = column.getTableName();
+      String columnPrefix = getTablePrefix(tableName);
+      if (!TextUtils.isEmpty(columnPrefix)) {
+        builder = builder.append(columnPrefix).append(".");
+      }
+      builder.append(column.getName()).append(" ")
+          .append(orderByColumnMap.get(column).toString());
+      ctr++;
+    }
+    return builder.toString();
+  }
+
   public RawQuery build() {
     StringBuilder builder = new StringBuilder().append(getSelectClause()).append("\n");
     builder.append(getFromClause()).append("\n");
     builder.append(getWhereClause());
 
-    return new RawQuery(builder.toString(), getArguments());
+    if (TextUtils.isEmpty(getOrderByClause())) {
+      return new RawQuery(builder.toString(), getArguments());
+
+    } else {
+      return new RawQuery(builder.toString(), getArguments(), getOrderByClause());
+    }
   }
 
   private class JoinClause {

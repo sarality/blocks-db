@@ -23,7 +23,9 @@ public class RawQuery extends Query {
     StringBuilder builder = new StringBuilder(getWhereClause());
     String orderByClause = getOrderByClause();
     if (!TextUtils.isEmpty(orderByClause)) {
-      builder.append("\n").append(getOrderByClause());
+      builder.append("\n")
+      .append("ORDER BY ")
+      .append(getOrderByClause());
     }
     return builder.toString();
   }

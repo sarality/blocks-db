@@ -3,7 +3,7 @@ package com.sarality.db.query;
 import com.sarality.db.Column;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +20,7 @@ public class SimpleQueryBuilder {
   private final List<QueryClause> clauseList = new ArrayList<>();
   private final List<AggregateMeasure> measuresList = new ArrayList<>();
   private final List<Column> groupByColumnList = new ArrayList<>();
-  private final Map<Column, SortOrder> orderByColumnMap = new HashMap<>();
+  private final Map<Column, SortOrder> orderByColumnMap = new LinkedHashMap<>();
 
   private Long limitSize;
   private Long limitOffset;

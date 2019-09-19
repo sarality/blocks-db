@@ -7,6 +7,7 @@ import com.sarality.db.io.DateTimeColumn;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public class SimpleJoinQueryBuilder {
   private final Map<String, List<JoinClause>> joinClauseListMap = new HashMap<>();
 
   private final List<QueryClause> clauseList = new ArrayList<>();
-  private final Map<Column, SortOrder> orderByColumnMap = new HashMap<>();
+  private final Map<Column, SortOrder> orderByColumnMap = new LinkedHashMap<>();
 
   public SimpleJoinQueryBuilder(String tableName, String tablePrefix, Column[] columns) {
     this(null, null, tableName, tablePrefix, columns);

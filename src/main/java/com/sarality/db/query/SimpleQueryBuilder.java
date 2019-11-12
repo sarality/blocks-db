@@ -58,6 +58,10 @@ public class SimpleQueryBuilder {
     return withFilter(new SimpleQueryClause(column, operator, value));
   }
 
+  public SimpleQueryBuilder withFilter(Column column, Operator operator, Double value) {
+    return withFilter(new SimpleQueryClause(column, operator, value));
+  }
+
   public SimpleQueryBuilder withFilter(Column column, Operator operator, DateTime value) {
     return withFilter(new SimpleQueryClause(column, operator, value));
   }

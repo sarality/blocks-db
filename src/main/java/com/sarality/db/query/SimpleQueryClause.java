@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import com.sarality.db.Column;
 import com.sarality.db.io.DateTimeColumn;
+import com.sarality.db.io.DoubleColumn;
 import com.sarality.db.io.EnumColumn;
 import com.sarality.db.io.LongColumn;
 
@@ -63,6 +64,10 @@ public class SimpleQueryClause implements QueryClause {
 
   public SimpleQueryClause(Column column, Operator operator, Long value) {
     this(column, operator, new LongColumn(null).getQueryArgValue(column, value));
+  }
+
+  public SimpleQueryClause(Column column, Operator operator, Double value) {
+    this(column, operator, new DoubleColumn(null).getQueryArgValue(column, value));
   }
 
   public SimpleQueryClause(Column column, Operator operator, DateTime value) {

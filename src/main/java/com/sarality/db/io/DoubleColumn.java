@@ -12,7 +12,8 @@ import com.sarality.db.DataType;
  * @author abhideep@ (Abhideep Singh)
  */
 
-public class DoubleColumn extends BaseColumn implements ColumnValueReader<Double>, ColumnValueWriter<Double> {
+public class DoubleColumn extends BaseColumn
+    implements ColumnValueReader<Double>, ColumnValueWriter<Double>, ColumnValueFormatter<Double> {
 
   public DoubleColumn(String prefix) {
     super(prefix);
@@ -40,5 +41,10 @@ public class DoubleColumn extends BaseColumn implements ColumnValueReader<Double
     } else {
       contentValues.putNull(column.getName());
     }
+  }
+
+  @Override
+  public String getQueryArgValue(Column column, Double value) {
+    return String.valueOf(value);
   }
 }

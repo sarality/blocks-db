@@ -48,10 +48,7 @@ public class JoinQueryCursorDataExtractor<T> implements CursorDataExtractor<T> {
   public T extract(Cursor cursor, Query query) {
     T value = cursorDataExtractor.extract(cursor, query);
     for (int ctr = 0; ctr < extractorList.size(); ctr++) {
-      FieldValueGetter<T, ?> checker = fieldValueCheckerList.get(ctr);
-      if (checker == null || checker.getValue(value) != null) {
-        processChild(cursor, query, value, ctr);
-      }
+      processChild(cursor, query, value, ctr);
     }
     return value;
   }
@@ -60,7 +57,9 @@ public class JoinQueryCursorDataExtractor<T> implements CursorDataExtractor<T> {
   private <A> void processChild(Cursor cursor, Query query, T value, int ctr) {
     CursorDataExtractor<A> extractor = (CursorDataExtractor<A>) extractorList.get(ctr);
     FieldValueSetter<T, A> setter = (FieldValueSetter<T, A>) childDataSetterList.get(ctr);
-    setter.setValue(value, extractor.extract(cursor, query));
-
+    FieldValueGetter<T, ?> checker = fieldValueCheckerList.get(ctr);
+    if (checker == null || checker.getValue(value) != null) {
+      setter.setValue(value, extractor.extract(cursor, query));
+    }
   }
 }

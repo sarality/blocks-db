@@ -36,6 +36,9 @@ public class SimpleJoinQueryBuilder {
   private final List<QueryClause> clauseList = new ArrayList<>();
   private final Map<Column, SortOrder> orderByColumnMap = new LinkedHashMap<>();
 
+  private Long limitSize;
+  private Long limitOffset;
+
   public SimpleJoinQueryBuilder(String tableName, String tablePrefix, Column[] columns) {
     this(null, null, tableName, tablePrefix, columns);
   }
@@ -146,6 +149,16 @@ public class SimpleJoinQueryBuilder {
 
   public SimpleJoinQueryBuilder orderBy(Column orderColumn, SortOrder sortOrder) {
     orderByColumnMap.put(orderColumn, sortOrder);
+    return this;
+  }
+
+  public SimpleJoinQueryBuilder limit(Long size) {
+    return limit(size, null);
+  }
+
+  public SimpleJoinQueryBuilder limit(Long size, Long offset) {
+    this.limitSize = size;
+    this.limitOffset = offset;
     return this;
   }
 
@@ -299,9 +312,9 @@ public class SimpleJoinQueryBuilder {
 
     if (TextUtils.isEmpty(getOrderByClause())) {
       return new RawQuery(builder.toString(), getArguments());
-
     } else {
-      return new RawQuery(builder.toString(), getArguments(), getOrderByClause());
+      return new RawQuery(builder.toString(), getArguments(), getOrderByClause(), null, null,
+          limitSize, limitOffset);
     }
   }
 

@@ -19,13 +19,25 @@ public class RawQuery extends Query {
     super(query, queryArguments, orderByClause);
   }
 
+  RawQuery(String query, String[] queryArguments,
+      String orderByClause, String groupByClause, String havingClause, Long limitSize, Long limitOffset) {
+    super(new String[] {}, query, queryArguments, orderByClause, groupByClause, havingClause, limitSize,
+        limitOffset);
+  }
+
   public final String getQuery() {
     StringBuilder builder = new StringBuilder(getWhereClause());
     String orderByClause = getOrderByClause();
     if (!TextUtils.isEmpty(orderByClause)) {
       builder.append("\n")
       .append("ORDER BY ")
-      .append(getOrderByClause());
+      .append(orderByClause);
+    }
+    String limit = getLimit();
+    if (!TextUtils.isEmpty(limit)) {
+      builder.append("\n")
+          .append("LIMIT ")
+          .append(limit);
     }
     return builder.toString();
   }
